@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wireframe - Tạo Biên Bản Mở Thầu</title>
+<style>
+  :root{
+    --bg:#fff; --panel:#fff; --border:#ddd; --muted:#6b7280; --accent:#000;
+    --radius:8px; --pad:16px; --mono: "Helvetica Neue", Arial, sans-serif;
+  }
+  html,body{height:100%; margin:0; font-family:var(--mono); background:var(--bg); color:#111;}
+  .container{max-width:1100px; margin:20px auto; padding:20px;}
+  header {display:flex; align-items:center; gap:12px; margin-bottom:18px;}
+  header h1{font-size:18px; margin:0; font-weight:600;}
+  .panel{border:1px solid var(--border); border-radius:var(--radius); padding:var(--pad); background:var(--panel); margin-bottom:16px;}
+  .row{display:flex; gap:12px;}
+  .col{flex:1;}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px;}
+  input[type="text"], input[type="datetime-local"], input[type="number"], textarea, select {
+    width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; box-sizing:border-box; font-size:14px;
+  }
+  textarea{min-height:64px; resize:vertical;}
+  .small{font-size:13px; color:var(--muted);}
+  .btn{display:inline-block; padding:8px 12px; border-radius:6px; border:1px solid var(--border); background:transparent; cursor:pointer; font-size:14px;}
+  .btn.primary{background:#111;color:#fff;border-color:#111;}
+  .btn.ghost{background:#fff;color:#111;}
+  .grid{width:100%; border-collapse:collapse; margin-top:12px;}
+  .grid th, .grid td{border:1px solid var(--border); padding:8px; text-align:left; font-size:14px;}
+  .grid th{background:#fafafa; font-weight:600;}
+  .actions{display:flex; gap:8px;}
+  .muted{color:var(--muted);}
+  .filebox{border:2px dashed var(--border); padding:12px; border-radius:6px; text-align:center;}
+  .badge{display:inline-block; padding:4px 8px; background:#f3f4f6; border-radius:999px; font-size:12px; color:var(--muted);}
+  /* modal */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,0.35); display:none; align-items:center; justify-content:center; z-index:50;}
+  .panel.modal{width:760px; max-width:95%;}
+  .field-inline{display:flex; gap:12px;}
+  .field-inline .col{flex:1;}
+  .help{font-size:12px; color:var(--muted); margin-top:6px;}
+  .top-actions{display:flex; justify-content:flex-end; gap:8px; margin-bottom:8px;}
+  .footer-actions{display:flex; gap:8px; justify-content:flex-end; margin-top:12px;}
+  .readonly{background:#f8f9fa;}
+  .grid .right{text-align:right;}
+  .note{font-size:13px; color:#000; background:#fff3cd; padding:8px; border-radius:6px; border:1px solid #ffeeba;}
+  @media print {
+    body *{visibility:visible;}
+    .btn, .actions, .top-actions, .footer-actions, .modal-backdrop{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <button class="btn" id="backBtn" title="Back">← Quay lại</button>
+    <h1>TẠO BIÊN BẢN MỞ THẦU — Wireframe (Dev)</h1>
+    <div style="margin-left:auto" class="small muted">Timezone: Africa/Maputo</div>
+  </header>
+
+  <!-- Header / Package -->
+  <section class="panel" aria-labelledby="packageHeading">
+    <div style="display:flex; gap:12px; align-items:flex-end;">
+      <div style="flex:1">
+        <label>Package No. <span class="muted">*</span></label>
+        <input id="packageNo" type="text" value="KD02/2025/MVT-SIM" />
+      </div>
+      <div style="flex:2">
+        <label>Package Title</label>
+        <input id="packageTitle" type="text" value="To purchase SIM Card" />
+      </div>
+      <div style="flex:1">
+        <label>Bid Closing Time <span class="muted">*</span></label>
+        <!-- use local datetime format for demo -->
+        <input id="bidClosing" type="datetime-local" value="2025-04-29T10:00" />
+      </div>
+      <div style="flex:1">
+        <label>Opening Time <span class="muted">*</span></label>
+        <input id="openingAt" type="datetime-local" value="2025-04-29T10:15" />
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <label>Location (Name & Address) <span class="muted">*</span></label>
+      <input id="locationName" type="text" value="Movitel SA" style="margin-bottom:8px;" />
+      <textarea id="locationAddress">Rua dos Desportistas, nº 691, Prédio ... Maputo, Mozambique</textarea>
+      <div class="help">Giá trị mặc định theo QĐ_MS_009. Bắt buộc để tạo biên bản.</div>
+    </div>
+  </section>
+
+  <!-- Participants -->
+  <section class="panel">
+    <h3 style="margin:0 0 8px 0">Thành phần tham dự</h3>
+    <div class="row" style="gap:8px;">
+      <div class="col">
+        <label>Investment Dept.</label>
+        <input type="text" id="p1" value="Mr. Miguel Juiz Nhocuana" />
+      </div>
+      <div class="col">
+        <label>Finance Dept.</label>
+        <input type="text" id="p2" value="Mr. Leonardo Pedro Sambo Junior" />
+      </div>
+      <div class="col">
+        <label>Legal Dept.</label>
+        <input type="text" id="p3" value="Mr. Wilson Albino Chimundo" />
+      </div>
+      <div class="col">
+        <label>Sales Dept.</label>
+        <input type="text" id="p4" value="Mr. Dario Gafur Chavisse" />
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <button class="btn" id="addParticipant">+ Thêm thành viên khác</button>
+    </div>
+  </section>
+
+  <!-- Upload -->
+  <section class="panel">
+    <h3 style="margin:0 0 8px 0">Upload hồ sơ dự thầu / Import</h3>
+    <div class="filebox">
+      <div style="margin-bottom:8px;">Kéo thả hoặc chọn file (pdf / zip / csv / docx). Hệ thống sẽ cố gắng trích tên nhà thầu từ file (OCR / filename)</div>
+      <input id="fileInput" type="file" multiple />
+      <div class="help">(Demo: không thực hiện OCR ở wireframe này — giả lập import khi nhấn \"Import demo data\")</div>
+      <div style="margin-top:8px;">
+        <button class="btn" id="importDemo">Import demo data</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bidders Grid -->
+  <section class="panel">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <h3 style="margin:0">Danh sách nhà thầu</h3>
+      <div class="muted"> (Các hàng có thể được import từ file hoặc nhập tay)</div>
+      <div style="margin-left:auto">
+        <button class="btn" id="addBidderBtn">+ Thêm nhà thầu thủ công</button>
+      </div>
+    </div>
+
+    <table class="grid" id="biddersTable" aria-describedby="biddersDesc">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên nhà thầu</th>
+          <th>Phương thức nộp</th>
+          <th>Application (USD)</th>
+          <th>CIF (USD)</th>
+          <th>Validity</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="biddersBody"></tbody>
+    </table>
+    <div id="biddersDesc" class="help" style="margin-top:8px;">
+      Grid hiển thị dữ liệu mẫu; click <span class="badge">Edit</span> để mở form chi tiết.
+    </div>
+  </section>
+
+  <!-- Footer Actions -->
+  <div class="panel" style="display:flex; align-items:center; justify-content:space-between;">
+    <div>
+      <button class="btn" id="downloadJson">Export JSON</button>
+      <button class="btn" id="downloadCsv">Export CSV</button>
+    </div>
+    <div class="footer-actions">
+      <button class="btn" id="saveDraft">Lưu nháp</button>
+      <button class="btn primary" id="generatePdf">Tạo Biên bản PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal slide-over (hidden by default) -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+  <div class="panel modal" role="document" id="modalPanel">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <strong id="modalTitle">Chi tiết hồ sơ nhà thầu</strong>
+      <div class="actions">
+        <button class="btn" id="closeModal">Close</button>
+      </div>
+    </div>
+
+    <!-- A. Identity -->
+    <div style="border-top:1px solid var(--border); padding-top:10px; margin-top:8px;">
+      <label>Chọn profile</label>
+      <div class="field-inline" style="margin-bottom:8px;">
+        <div style="flex:1">
+          <select id="selectMode">
+            <option value="select">Select from system (search)</option>
+            <option value="manual">Enter manually</option>
+          </select>
+        </div>
+        <div style="flex:2" id="systemSelectWrap">
+          <label class="small muted">Search bidder</label>
+          <input type="text" id="bidderSearch" placeholder="Search bidder..." />
+        </div>
+      </div>
+
+      <div id="manualFields" style="display:none;">
+        <label>Tên nhà thầu <span class="muted">*</span></label>
+        <input type="text" id="modalBidderName" />
+        <label style="margin-top:8px">Địa chỉ <span class="muted">*</span></label>
+        <textarea id="modalBidderAddress"></textarea>
+      </div>
+    </div>
+
+    <!-- B. Submission details -->
+    <div style="border-top:1px solid var(--border); padding-top:10px; margin-top:8px;">
+      <label>Phương thức nộp <span class="muted">*</span></label>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <label><input type="radio" name="method" value="ARIBA"> Ariba</label>
+        <label><input type="radio" name="method" value="EMAIL"> Email</label>
+        <label><input type="radio" name="method" value="HARDCOPY"> Hardcopy</label>
+      </div>
+
+      <div class="field-inline">
+        <div class="col">
+          <label>Time of submission</label>
+          <input id="modalSubmissionTime" type="datetime-local" />
+        </div>
+        <div class="col">
+          <label>Số bản nộp</label>
+          <input id="modalNumCopies" type="text" value="01 scan file" />
+        </div>
+      </div>
+    </div>
+
+    <!-- C. Price -->
+    <div style="border-top:1px solid var(--border); padding-top:10px; margin-top:8px;">
+      <label>Giá chào thầu</label>
+      <div class="field-inline" style="margin-top:8px;">
+        <div class="col">
+          <label>Application Letter (USD)</label>
+          <input id="modalPriceApp" type="number" step="0.01" min="0" />
+        </div>
+        <div class="col">
+          <label>FOB Price (USD)</label>
+          <input id="modalPriceFob" type="number" step="0.01" min="0" />
+        </div>
+        <div class="col">
+          <label>Freight + Insurance (USD)</label>
+          <input id="modalPriceFreight" type="number" step="0.01" min="0" />
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <label>CIF Price (USD) — auto</label>
+        <input id="modalPriceCif" type="text" class="readonly" readonly />
+        <div class="help">CIF = FOB + Freight + Insurance (tự tính)</div>
+      </div>
+    </div>
+
+    <!-- D. Terms -->
+    <div style="border-top:1px solid var(--border); padding-top:10px; margin-top:8px;">
+      <div class="field-inline">
+        <div class="col">
+          <label>Validity (days)</label>
+          <input id="modalValidity" type="number" value="180" min="1" />
+        </div>
+        <div class="col">
+          <label>Validity from</label>
+          <input id="modalValidityFrom" type="date" />
+        </div>
+      </div>
+      <div style="margin-top:8px;" class="field-inline">
+        <div class="col">
+          <label>Delivery Term</label>
+          <input id="modalDelivery" type="text" value="Follow RFP" />
+        </div>
+        <div class="col">
+          <label>Payment Term</label>
+          <input id="modalPayment" type="text" value="Follow RFP" />
+        </div>
+        <div class="col">
+          <label>Warranty Term</label>
+          <input id="modalWarranty" type="text" value="Follow RFP" />
+        </div>
+      </div>
+    </div>
+
+    <!-- notes & actions -->
+    <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+      <div class="small muted">Trạng thái: <span id="modalStatus">editing</span></div>
+      <div>
+        <button class="btn" id="modalCancel">Hủy</button>
+        <button class="btn primary" id="modalSave">Lưu</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ---------- Demo dataset (from user's Book1 / earlier sample) ---------- */
+let state = {
+  meeting: {
+    meeting_id: 1001,
+    package_no: "KD02/2025/MVT-SIM",
+    package_title: "To purchase SIM Card",
+    bid_closing_at: "2025-04-29T10:00:00+02:00",
+    opening_at: "2025-04-29T10:15:00+02:00",
+    location_name: "Movitel SA",
+    location_address: "Rua dos Desportistas, nº 691, Prédio JAT VI-1, Piso 12 – Cidade de Maputo, Mozambique",
+    participants: [
+      {name: "Mr. Miguel Juiz Nhocuana", dept: "Investment Dept."},
+      {name: "Mr. Leonardo Pedro Sambo Junior", dept: "Finance Dept."},
+      {name: "Mr. Wilson Albino Chimundo", dept: "Legal Dept."},
+      {name: "Mr. Dario Gafur Chavisse", dept: "Sales Dept."}
+    ]
+  },
+  submissions: [
+    {submission_id:2001, bidder_name:"DP International", method:"ARIBA", price_application_usd:1309000, price_fob_usd:1287000, price_freight_ins_usd:11000, price_cif_usd:1298000, validity_days:180, validity_from:"2025-04-29"},
+    {submission_id:2002, bidder_name:"HM Mobile", method:"EMAIL", price_application_usd:1298000, price_fob_usd:null, price_freight_ins_usd:null, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29"},
+    {submission_id:2003, bidder_name:"MK Smart", method:"ARIBA", price_application_usd:1364000, price_fob_usd:null, price_freight_ins_usd:null, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29"},
+    {submission_id:2004, bidder_name:"PT Watchdata", method:"HARDCOPY", price_application_usd:1205600, price_fob_usd:1222991, price_freight_ins_usd:11000, price_cif_usd:1233991, validity_days:181, validity_from:"2025-04-29"},
+    {submission_id:2005, bidder_name:"VCM", method:"EMAIL", price_application_usd:1342000, price_fob_usd:1331000, price_freight_ins_usd:11000, price_cif_usd:1342000, validity_days:185, validity_from:"2025-04-29"},
+    {submission_id:2006, bidder_name:"Workz Media FZ LCC", method:"ARIBA", price_application_usd:1243000, price_fob_usd:null, price_freight_ins_usd:20009, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29"}
+  ]
+};
+
+/* ---------- Utilities ---------- */
+function moneyFmt(n){
+  if(n===null || typeof n === 'undefined') return '-';
+  return Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function renderBidders(){
+  const body = document.getElementById('biddersBody');
+  body.innerHTML = '';
+  state.submissions.forEach((s, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${s.bidder_name}</td>
+      <td>${s.method || '-'}</td>
+      <td class="right">${moneyFmt(s.price_application_usd)}</td>
+      <td class="right">${moneyFmt(s.price_cif_usd)}</td>
+      <td>${s.validity_days} days</td>
+      <td class="right"><div class="actions">
+        <button class="btn" data-action="edit" data-id="${s.submission_id}">Edit</button>
+        <button class="btn" data-action="delete" data-id="${s.submission_id}">Delete</button>
+      </div></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+function findSubmission(id){ return state.submissions.find(s=>s.submission_id==id); }
+function openModalFor(id){
+  const modal = document.getElementById('modalBackdrop');
+  const s = findSubmission(id) || null;
+  document.getElementById('modalTitle').textContent = s ? `Chi tiết: ${s.bidder_name} (ID ${s.submission_id})` : 'Thêm nhà thầu mới';
+  // mode select/manual default select
+  document.getElementById('selectMode').value = 'select';
+  document.getElementById('systemSelectWrap').style.display = 'block';
+  document.getElementById('manualFields').style.display = 'none';
+  // fill fields
+  document.getElementById('bidderSearch').value = s ? s.bidder_name : '';
+  document.getElementById('modalBidderName').value = s ? s.bidder_name : '';
+  document.getElementById('modalBidderAddress').value = s ? (s.bidder_address || '') : '';
+  document.querySelectorAll('input[name="method"]').forEach(r=>r.checked = false);
+  if(s && s.method) {
+    const sel = Array.from(document.querySelectorAll('input[name="method"]')).find(r=>r.value===s.method);
+    if(sel) sel.checked = true;
+  }
+  document.getElementById('modalSubmissionTime').value = s && s.submission_time ? s.submission_time.slice(0,16) : '';
+  document.getElementById('modalNumCopies').value = s ? (s.num_copies || '01 scan file') : '01 scan file';
+  document.getElementById('modalPriceApp').value = s && s.price_application_usd != null ? s.price_application_usd : '';
+  document.getElementById('modalPriceFob').value = s && s.price_fob_usd != null ? s.price_fob_usd : '';
+  document.getElementById('modalPriceFreight').value = s && s.price_freight_ins_usd != null ? s.price_freight_ins_usd : '';
+  // compute CIF
+  computeCif();
+  document.getElementById('modalPriceCif').value = s && s.price_cif_usd != null ? moneyFmt(s.price_cif_usd) : document.getElementById('modalPriceCif').value;
+  document.getElementById('modalValidity').value = s ? (s.validity_days || 180) : 180;
+  document.getElementById('modalValidityFrom').value = s ? (s.validity_from || '') : '';
+  document.getElementById('modalDelivery').value = s ? (s.delivery_term || 'Follow RFP') : 'Follow RFP';
+  document.getElementById('modalPayment').value = s ? (s.payment_term || 'Follow RFP') : 'Follow RFP';
+  document.getElementById('modalWarranty').value = s ? (s.warranty_term || 'Follow RFP') : 'Follow RFP';
+  document.getElementById('modalStatus').textContent = s ? 'editing' : 'new';
+  modal.style.display = 'flex';
+  modal.scrollTop = 0;
+  modal.dataset.currentId = s ? s.submission_id : 'new';
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').style.display = 'none';
+}
+function computeCif(){
+  const f = parseFloat(document.getElementById('modalPriceFob').value) || 0;
+  const fr = parseFloat(document.getElementById('modalPriceFreight').value) || 0;
+  const c = (f && fr) ? (f + fr) : ( (f || fr) ? (f + fr) : '' );
+  document.getElementById('modalPriceCif').value = c ? moneyFmt(c) : '-';
+  return c;
+}
+function saveModal(){
+  const id = document.getElementById('modalBackdrop').dataset.currentId;
+  const mode = document.getElementById('selectMode').value;
+  let name = document.getElementById('modalBidderName').value.trim();
+  let address = document.getElementById('modalBidderAddress').value.trim();
+  const method = (document.querySelector('input[name="method"]:checked')||{}).value;
+  // basic validation
+  const errors = [];
+  if(!name) errors.push('Tên nhà thầu bắt buộc.');
+  if(!address) errors.push('Địa chỉ nhà thầu bắt buộc.');
+  if(!method) errors.push('Chọn phương thức nộp (Ariba/Email/Hardcopy).');
+  if(errors.length){
+    alert('Validation:\n- '+errors.join('\n- '));
+    return;
+  }
+  const app = document.getElementById('modalPriceApp').value ? parseFloat(document.getElementById('modalPriceApp').value) : null;
+  const fob = document.getElementById('modalPriceFob').value ? parseFloat(document.getElementById('modalPriceFob').value) : null;
+  const freight = document.getElementById('modalPriceFreight').value ? parseFloat(document.getElementById('modalPriceFreight').value) : null;
+  const cif = (fob || freight) ? ( (fob||0) + (freight||0) ) : null;
+  const validity = parseInt(document.getElementById('modalValidity').value) || 180;
+  const validity_from = document.getElementById('modalValidityFrom').value || null;
+  const delivery = document.getElementById('modalDelivery').value || 'Follow RFP';
+  const payment = document.getElementById('modalPayment').value || 'Follow RFP';
+  const warranty = document.getElementById('modalWarranty').value || 'Follow RFP';
+  const submission_time = document.getElementById('modalSubmissionTime').value ? (document.getElementById('modalSubmissionTime').value + ':00') : null;
+  const num_copies = document.getElementById('modalNumCopies').value || '';
+  if(id === 'new'){
+    const newId = Date.now();
+    state.submissions.push({
+      submission_id: newId,
+      bidder_name: name,
+      bidder_address: address,
+      method: method,
+      submission_time: submission_time,
+      num_copies: num_copies,
+      price_application_usd: app,
+      price_fob_usd: fob,
+      price_freight_ins_usd: freight,
+      price_cif_usd: cif,
+      validity_days: validity,
+      validity_from: validity_from,
+      delivery_term: delivery,
+      payment_term: payment,
+      warranty_term: warranty
+    });
+  } else {
+    const s = findSubmission(id);
+    if(!s) { alert('Không tìm thấy submission'); return; }
+    s.bidder_name = name;
+    s.bidder_address = address;
+    s.method = method;
+    s.submission_time = submission_time;
+    s.num_copies = num_copies;
+    s.price_application_usd = app;
+    s.price_fob_usd = fob;
+    s.price_freight_ins_usd = freight;
+    s.price_cif_usd = cif;
+    s.validity_days = validity;
+    s.validity_from = validity_from;
+    s.delivery_term = delivery;
+    s.payment_term = payment;
+    s.warranty_term = warranty;
+  }
+  renderBidders();
+  closeModal();
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // initialize header values
+  document.getElementById('packageNo').value = state.meeting.package_no;
+  document.getElementById('packageTitle').value = state.meeting.package_title;
+  document.getElementById('locationName').value = state.meeting.location_name;
+  document.getElementById('locationAddress').value = state.meeting.location_address;
+  // init participants
+  const p = state.meeting.participants;
+  if(p[0]) document.getElementById('p1').value = p[0].name;
+  if(p[1]) document.getElementById('p2').value = p[1].name;
+  if(p[2]) document.getElementById('p3').value = p[2].name;
+  if(p[3]) document.getElementById('p4').value = p[3].name;
+
+  renderBidders();
+
+  // handle table actions
+  document.getElementById('biddersBody').addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('button');
+    if(!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    if(action==='edit') openModalFor(id);
+    if(action==='delete'){
+      if(confirm('Xóa nhà thầu này?')){
+        state.submissions = state.submissions.filter(s=>s.submission_id!=id);
+        renderBidders();
+      }
+    }
+  });
+
+  // open new bidder modal
+  document.getElementById('addBidderBtn').addEventListener('click', ()=> openModalFor(null));
+  // import demo
+  document.getElementById('importDemo').addEventListener('click', ()=>{
+    alert('Demo import: dữ liệu mẫu đã load (không đọc file thật trong wireframe).');
+    renderBidders();
+  });
+  // modal controls
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('modalSave').addEventListener('click', saveModal);
+  document.getElementById('selectMode').addEventListener('change', (e)=>{
+    const v = e.target.value;
+    if(v==='manual'){ document.getElementById('manualFields').style.display='block'; document.getElementById('systemSelectWrap').style.display='none'; }
+    else { document.getElementById('manualFields').style.display='none'; document.getElementById('systemSelectWrap').style.display='block'; }
+  });
+  // compute cif on change
+  ['modalPriceFob','modalPriceFreight'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', ()=> {
+      const c = computeCif();
+      document.getElementById('modalPriceCif').value = c ? moneyFmt(c) : '-';
+    });
+  });
+  // save draft
+  document.getElementById('saveDraft').addEventListener('click', ()=>{
+    // In real app: POST to backend. Here just show console
+    console.log('Save draft payload:', JSON.stringify({meeting: state.meeting, submissions: state.submissions}, null,2));
+    alert('Đã lưu nháp (demo). Xem console để lấy payload JSON.');
+  });
+  // export json
+  document.getElementById('downloadJson').addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify({meeting: state.meeting, submissions: state.submissions}, null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'meeting_1001.json'; a.click(); URL.revokeObjectURL(url);
+  });
+  document.getElementById('downloadCsv').addEventListener('click', ()=>{
+    // build CSV from submissions
+    const rows = [['submission_id','bidder_name','method','price_application_usd','price_fob_usd','price_freight_ins_usd','price_cif_usd','validity_days','validity_from']];
+    state.submissions.forEach(s=>{
+      rows.push([s.submission_id, `"${s.bidder_name}"`, s.method||'', s.price_application_usd||'', s.price_fob_usd||'', s.price_freight_ins_usd||'', s.price_cif_usd||'', s.validity_days||'', s.validity_from||'']);
+    });
+    const csv = rows.map(r=>r.join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'submissions.csv'; a.click(); URL.revokeObjectURL(url);
+  });
+  // generate PDF -> use print for demo
+  document.getElementById('generatePdf').addEventListener('click', ()=>{
+    // validation: header fields required, at least 1 submission
+    const pkg = document.getElementById('packageNo').value.trim();
+    const closing = document.getElementById('bidClosing').value;
+    const opening = document.getElementById('openingAt').value;
+    if(!pkg || !closing || !opening){ alert('Thiếu thông tin Header: Package No., Bid Closing hoặc Opening time.'); return; }
+    if(state.submissions.length===0){ alert('Cần ít nhất 1 hồ sơ dự thầu để tạo biên bản.'); return; }
+    // update meeting data from header inputs (demo)
+    state.meeting.package_no = document.getElementById('packageNo').value;
+    state.meeting.package_title = document.getElementById('packageTitle').value;
+    state.meeting.location_name = document.getElementById('locationName').value;
+    state.meeting.location_address = document.getElementById('locationAddress').value;
+    // print (dev: this prints the current page, in real app generate PDF template server-side)
+    window.print();
+  });
+});
+
+/* allow opening modal by calling openModalFor(null) */
+document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
+  if(e.target === document.getElementById('modalBackdrop')) closeModal();
+});
+</script>
+</body>
+</html>
