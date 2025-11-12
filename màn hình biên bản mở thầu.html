@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Wireframe - Tạo Biên Bản Mở Thầu</title>
+<title>Wireframe - Tạo Biên Bản Mở Thầu (v3)</title>
 <style>
   :root{
     --bg:#fff; --panel:#fff; --border:#ddd; --muted:#6b7280; --accent:#000;
@@ -30,11 +30,10 @@
   .grid th{background:#fafafa; font-weight:600;}
   .actions{display:flex; gap:8px;}
   .muted{color:var(--muted);}
-  .filebox{border:2px dashed var(--border); padding:12px; border-radius:6px; text-align:center;}
   .badge{display:inline-block; padding:4px 8px; background:#f3f4f6; border-radius:999px; font-size:12px; color:var(--muted);}
   /* modal */
   .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,0.35); display:none; align-items:center; justify-content:center; z-index:50;}
-  .panel.modal{width:760px; max-width:95%;}
+  .panel.modal{width:920px; max-width:95%; max-height:90vh; overflow:auto;}
   .field-inline{display:flex; gap:12px;}
   .field-inline .col{flex:1;}
   .help{font-size:12px; color:var(--muted); margin-top:6px;}
@@ -43,6 +42,10 @@
   .readonly{background:#f8f9fa;}
   .grid .right{text-align:right;}
   .note{font-size:13px; color:#000; background:#fff3cd; padding:8px; border-radius:6px; border:1px solid #ffeeba;}
+  .file-list{margin-top:8px; font-size:13px;}
+  .file-list li{margin-bottom:4px;}
+  .upload-row{display:flex; gap:8px; align-items:center; margin-top:6px;}
+  .group-title{font-weight:600; margin-top:12px;}
   @media print {
     body *{visibility:visible;}
     .btn, .actions, .top-actions, .footer-actions, .modal-backdrop{display:none !important;}
@@ -70,7 +73,6 @@
       </div>
       <div style="flex:1">
         <label>Bid Closing Time <span class="muted">*</span></label>
-        <!-- use local datetime format for demo -->
         <input id="bidClosing" type="datetime-local" value="2025-04-29T10:00" />
       </div>
       <div style="flex:1">
@@ -81,7 +83,7 @@
     <div style="margin-top:12px;">
       <label>Location (Name & Address) <span class="muted">*</span></label>
       <input id="locationName" type="text" value="Movitel SA" style="margin-bottom:8px;" />
-      <textarea id="locationAddress">Rua dos Desportistas, nº 691, Prédio ... Maputo, Mozambique</textarea>
+      <textarea id="locationAddress">Rua dos Desportistas, nº 691, Prédio JAT VI-1, Piso 12 – Cidade de Maputo, Mozambique</textarea>
       <div class="help">Giá trị mặc định theo QĐ_MS_009. Bắt buộc để tạo biên bản.</div>
     </div>
   </section>
@@ -112,25 +114,13 @@
     </div>
   </section>
 
-  <!-- Upload -->
-  <section class="panel">
-    <h3 style="margin:0 0 8px 0">Upload hồ sơ dự thầu / Import</h3>
-    <div class="filebox">
-      <div style="margin-bottom:8px;">Kéo thả hoặc chọn file (pdf / zip / csv / docx). Hệ thống sẽ cố gắng trích tên nhà thầu từ file (OCR / filename)</div>
-      <input id="fileInput" type="file" multiple />
-      <div class="help">(Demo: không thực hiện OCR ở wireframe này — giả lập import khi nhấn \"Import demo data\")</div>
-      <div style="margin-top:8px;">
-        <button class="btn" id="importDemo">Import demo data</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Bidders Grid -->
+  <!-- NOTE: Removed global Upload panel; files are uploaded per-bidder in modal -->
   <section class="panel">
     <div style="display:flex; align-items:center; gap:12px;">
       <h3 style="margin:0">Danh sách nhà thầu</h3>
-      <div class="muted"> (Các hàng có thể được import từ file hoặc nhập tay)</div>
+      <div class="muted"> (Các hàng lấy từ DB / import; upload tài liệu theo từng nhà thầu)</div>
       <div style="margin-left:auto">
+        <button class="btn" id="importDemo">Import demo data</button>
         <button class="btn" id="addBidderBtn">+ Thêm nhà thầu thủ công</button>
       </div>
     </div>
@@ -144,13 +134,14 @@
           <th>Application (USD)</th>
           <th>CIF (USD)</th>
           <th>Validity</th>
+          <th>Files</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="biddersBody"></tbody>
     </table>
     <div id="biddersDesc" class="help" style="margin-top:8px;">
-      Grid hiển thị dữ liệu mẫu; click <span class="badge">Edit</span> để mở form chi tiết.
+      Click <span class="badge">Edit</span> để mở form chi tiết và upload tài liệu theo nhóm (Pháp chế / Tài chính / Kỹ thuật / Thương mại).
     </div>
   </section>
 
@@ -162,7 +153,7 @@
     </div>
     <div class="footer-actions">
       <button class="btn" id="saveDraft">Lưu nháp</button>
-      <button class="btn primary" id="generatePdf">Tạo Biên bản PDF</button>
+      <button class="btn primary" id="generatePdf">Tạo Biên Bản PDF</button>
     </div>
   </div>
 </div>
@@ -274,6 +265,100 @@
       </div>
     </div>
 
+    <!-- E. Upload groups: Legal / Financial / Technical / Commercial -->
+    <div style="border-top:1px solid var(--border); padding-top:10px; margin-top:8px;">
+      <div class="group-title">1) Pháp chế</div>
+      <div class="small muted">- Giấy phép kinh doanh/Giấy chứng nhận đăng ký doanh nghiệp</div>
+      <div class="upload-row">
+        <input type="file" id="file_legal_business" multiple data-group="legal_business" />
+        <button class="btn" onclick="triggerFile('file_legal_business')">Upload</button>
+        <div class="small muted">Accepted: pdf/docx</div>
+      </div>
+      <ul class="file-list" id="list_legal_business"></ul>
+
+      <div class="small muted" style="margin-top:8px;">- Thỏa thuận liên doanh (nếu có)</div>
+      <div class="upload-row">
+        <input type="file" id="file_legal_jv" multiple data-group="legal_jv" />
+        <button class="btn" onclick="triggerFile('file_legal_jv')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_legal_jv"></ul>
+
+      <div class="small muted" style="margin-top:8px;">- Thư ủy quyền</div>
+      <div class="upload-row">
+        <input type="file" id="file_legal_poas" multiple data-group="legal_poas" />
+        <button class="btn" onclick="triggerFile('file_legal_poas')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_legal_poas"></ul>
+
+      <div class="group-title">2) Tài chính</div>
+      <div class="small muted">- Báo cáo tài chính 2 năm gần nhất</div>
+      <div class="upload-row">
+        <input type="file" id="file_fin_report" multiple data-group="fin_report" />
+        <button class="btn" onclick="triggerFile('file_fin_report')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_fin_report"></ul>
+
+      <div class="small muted" style="margin-top:8px;">- Financial Statement</div>
+      <div class="upload-row">
+        <input type="file" id="file_fin_statement" multiple data-group="fin_statement" />
+        <button class="btn" onclick="triggerFile('file_fin_statement')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_fin_statement"></ul>
+
+      <div class="group-title">3) Tài liệu kỹ thuật chuyên môn</div>
+      <div class="small muted">• Statement of technical compliance & Technical Data sheet</div>
+      <div class="upload-row">
+        <input type="file" id="file_tech_sot" multiple data-group="tech_sot" />
+        <button class="btn" onclick="triggerFile('file_tech_sot')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_tech_sot"></ul>
+
+      <div class="small muted" style="margin-top:8px;">• Statement of Technical Compliance/Catalogue/Datasheet chi tiết</div>
+      <div class="upload-row">
+        <input type="file" id="file_tech_catalogue" multiple data-group="tech_catalogue" />
+        <button class="btn" onclick="triggerFile('file_tech_catalogue')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_tech_catalogue"></ul>
+
+      <div class="small muted" style="margin-top:8px;">• Giấy chứng nhận chất lượng (nếu có)</div>
+      <div class="upload-row">
+        <input type="file" id="file_tech_cert" multiple data-group="tech_cert" />
+        <button class="btn" onclick="triggerFile('file_tech_cert')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_tech_cert"></ul>
+
+      <div class="group-title">4) Tài liệu đánh giá thương mại</div>
+      <div class="small muted">• Application Forms</div>
+      <div class="upload-row">
+        <input type="file" id="file_comm_app" multiple data-group="comm_app" />
+        <button class="btn" onclick="triggerFile('file_comm_app')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_comm_app"></ul>
+
+      <div class="small muted" style="margin-top:8px;">• Bill of Quantity</div>
+      <div class="upload-row">
+        <input type="file" id="file_comm_boq" multiple data-group="comm_boq" />
+        <button class="btn" onclick="triggerFile('file_comm_boq')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_comm_boq"></ul>
+
+      <div class="small muted" style="margin-top:8px;">• Hợp đồng tương tự</div>
+      <div class="upload-row">
+        <input type="file" id="file_comm_contracts" multiple data-group="comm_contracts" />
+        <button class="btn" onclick="triggerFile('file_comm_contracts')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_comm_contracts"></ul>
+
+      <div class="small muted" style="margin-top:8px;">• Warranty commitment</div>
+      <div class="upload-row">
+        <input type="file" id="file_comm_warranty" multiple data-group="comm_warranty" />
+        <button class="btn" onclick="triggerFile('file_comm_warranty')">Upload</button>
+      </div>
+      <ul class="file-list" id="list_comm_warranty"></ul>
+
+      <div class="help" style="margin-top:8px;">Lưu ý: đây là UI upload tạm thời cho wireframe. Trong thực tế, file sẽ được upload lên server và trả về URL.</div>
+    </div>
+
     <!-- notes & actions -->
     <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
       <div class="small muted">Trạng thái: <span id="modalStatus">editing</span></div>
@@ -305,12 +390,12 @@ let state = {
     ]
   },
   submissions: [
-    {submission_id:2001, bidder_name:"DP International", method:"ARIBA", price_application_usd:1309000, price_fob_usd:1287000, price_freight_ins_usd:11000, price_cif_usd:1298000, validity_days:180, validity_from:"2025-04-29"},
-    {submission_id:2002, bidder_name:"HM Mobile", method:"EMAIL", price_application_usd:1298000, price_fob_usd:null, price_freight_ins_usd:null, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29"},
-    {submission_id:2003, bidder_name:"MK Smart", method:"ARIBA", price_application_usd:1364000, price_fob_usd:null, price_freight_ins_usd:null, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29"},
-    {submission_id:2004, bidder_name:"PT Watchdata", method:"HARDCOPY", price_application_usd:1205600, price_fob_usd:1222991, price_freight_ins_usd:11000, price_cif_usd:1233991, validity_days:181, validity_from:"2025-04-29"},
-    {submission_id:2005, bidder_name:"VCM", method:"EMAIL", price_application_usd:1342000, price_fob_usd:1331000, price_freight_ins_usd:11000, price_cif_usd:1342000, validity_days:185, validity_from:"2025-04-29"},
-    {submission_id:2006, bidder_name:"Workz Media FZ LCC", method:"ARIBA", price_application_usd:1243000, price_fob_usd:null, price_freight_ins_usd:20009, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29"}
+    {submission_id:2001, bidder_name:"DP International", bidder_address:"Suite # 1401, Daeha Business Center, 360 Kim Ma Str., Hanoi, Vietnam", method:"ARIBA", price_application_usd:1309000, price_fob_usd:1287000, price_freight_ins_usd:11000, price_cif_usd:1298000, validity_days:180, validity_from:"2025-04-29", files: {}},
+    {submission_id:2002, bidder_name:"HM Mobile", bidder_address:"Licogi Tower, Hanoi", method:"EMAIL", price_application_usd:1298000, price_fob_usd:null, price_freight_ins_usd:null, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29", files: {}},
+    {submission_id:2003, bidder_name:"MK Smart", bidder_address:"Quang Minh Industrial Zone, Hanoi", method:"ARIBA", price_application_usd:1364000, price_fob_usd:null, price_freight_ins_usd:null, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29", files: {}},
+    {submission_id:2004, bidder_name:"PT Watchdata", bidder_address:"Unity Building... Indonesia", method:"HARDCOPY", price_application_usd:1205600, price_fob_usd:1222991, price_freight_ins_usd:11000, price_cif_usd:1233991, validity_days:181, validity_from:"2025-04-29", files: {}},
+    {submission_id:2005, bidder_name:"VCM", bidder_address:"No.01 Giang Van Minh", method:"EMAIL", price_application_usd:1342000, price_fob_usd:1331000, price_freight_ins_usd:11000, price_cif_usd:1342000, validity_days:185, validity_from:"2025-04-29", files: {}},
+    {submission_id:2006, bidder_name:"Workz Media FZ LCC", bidder_address:"Dubai, UAE", method:"ARIBA", price_application_usd:1243000, price_fob_usd:null, price_freight_ins_usd:20009, price_cif_usd:null, validity_days:180, validity_from:"2025-04-29", files: {}}
   ]
 };
 
@@ -323,6 +408,7 @@ function renderBidders(){
   const body = document.getElementById('biddersBody');
   body.innerHTML = '';
   state.submissions.forEach((s, idx) => {
+    const filesSummary = summarizeFiles(s.files);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx+1}</td>
@@ -331,6 +417,7 @@ function renderBidders(){
       <td class="right">${moneyFmt(s.price_application_usd)}</td>
       <td class="right">${moneyFmt(s.price_cif_usd)}</td>
       <td>${s.validity_days} days</td>
+      <td>${filesSummary}</td>
       <td class="right"><div class="actions">
         <button class="btn" data-action="edit" data-id="${s.submission_id}">Edit</button>
         <button class="btn" data-action="delete" data-id="${s.submission_id}">Delete</button>
@@ -339,16 +426,39 @@ function renderBidders(){
     body.appendChild(tr);
   });
 }
+function summarizeFiles(filesObj){
+  if(!filesObj) return '-';
+  const groups = Object.keys(filesObj);
+  if(groups.length===0) return '-';
+  const parts = groups.map(g=>{
+    const n = (filesObj[g]||[]).length;
+    // friendly label mapping
+    const label = {
+      legal_business: 'Pháp chế - Giấy phép',
+      legal_jv: 'Pháp chế - JV',
+      legal_poas: 'Pháp chế - POA',
+      fin_report: 'Tài chính - Reports',
+      fin_statement: 'Tài chính - Statement',
+      tech_sot: 'Kỹ thuật - SOT',
+      tech_catalogue: 'Kỹ thuật - Catalogue',
+      tech_cert: 'Kỹ thuật - Cert',
+      comm_app: 'Thương mại - App',
+      comm_boq: 'Thương mại - BOQ',
+      comm_contracts: 'Thương mại - Contracts',
+      comm_warranty: 'Thương mại - Warranty'
+    }[g] || g;
+    return `${label}: ${n}`;
+  });
+  return parts.join('; ');
+}
 function findSubmission(id){ return state.submissions.find(s=>s.submission_id==id); }
 function openModalFor(id){
   const modal = document.getElementById('modalBackdrop');
   const s = findSubmission(id) || null;
   document.getElementById('modalTitle').textContent = s ? `Chi tiết: ${s.bidder_name} (ID ${s.submission_id})` : 'Thêm nhà thầu mới';
-  // mode select/manual default select
   document.getElementById('selectMode').value = 'select';
   document.getElementById('systemSelectWrap').style.display = 'block';
   document.getElementById('manualFields').style.display = 'none';
-  // fill fields
   document.getElementById('bidderSearch').value = s ? s.bidder_name : '';
   document.getElementById('modalBidderName').value = s ? s.bidder_name : '';
   document.getElementById('modalBidderAddress').value = s ? (s.bidder_address || '') : '';
@@ -362,7 +472,6 @@ function openModalFor(id){
   document.getElementById('modalPriceApp').value = s && s.price_application_usd != null ? s.price_application_usd : '';
   document.getElementById('modalPriceFob').value = s && s.price_fob_usd != null ? s.price_fob_usd : '';
   document.getElementById('modalPriceFreight').value = s && s.price_freight_ins_usd != null ? s.price_freight_ins_usd : '';
-  // compute CIF
   computeCif();
   document.getElementById('modalPriceCif').value = s && s.price_cif_usd != null ? moneyFmt(s.price_cif_usd) : document.getElementById('modalPriceCif').value;
   document.getElementById('modalValidity').value = s ? (s.validity_days || 180) : 180;
@@ -370,6 +479,18 @@ function openModalFor(id){
   document.getElementById('modalDelivery').value = s ? (s.delivery_term || 'Follow RFP') : 'Follow RFP';
   document.getElementById('modalPayment').value = s ? (s.payment_term || 'Follow RFP') : 'Follow RFP';
   document.getElementById('modalWarranty').value = s ? (s.warranty_term || 'Follow RFP') : 'Follow RFP';
+  // initialize files lists for each group
+  const groups = ['legal_business','legal_jv','legal_poas','fin_report','fin_statement','tech_sot','tech_catalogue','tech_cert','comm_app','comm_boq','comm_contracts','comm_warranty'];
+  groups.forEach(g=>{
+    const el = document.getElementById('list_'+g);
+    el.innerHTML = '';
+    const arr = (s && s.files && s.files[g]) ? s.files[g] : [];
+    arr.forEach(fname=>{
+      const li = document.createElement('li');
+      li.textContent = fname;
+      el.appendChild(li);
+    });
+  });
   document.getElementById('modalStatus').textContent = s ? 'editing' : 'new';
   modal.style.display = 'flex';
   modal.scrollTop = 0;
@@ -381,7 +502,7 @@ function closeModal(){
 function computeCif(){
   const f = parseFloat(document.getElementById('modalPriceFob').value) || 0;
   const fr = parseFloat(document.getElementById('modalPriceFreight').value) || 0;
-  const c = (f && fr) ? (f + fr) : ( (f || fr) ? (f + fr) : '' );
+  const c = (f || fr) ? (f + fr) : '';
   document.getElementById('modalPriceCif').value = c ? moneyFmt(c) : '-';
   return c;
 }
@@ -428,7 +549,8 @@ function saveModal(){
       validity_from: validity_from,
       delivery_term: delivery,
       payment_term: payment,
-      warranty_term: warranty
+      warranty_term: warranty,
+      files: collectCurrentFiles()
     });
   } else {
     const s = findSubmission(id);
@@ -447,13 +569,50 @@ function saveModal(){
     s.delivery_term = delivery;
     s.payment_term = payment;
     s.warranty_term = warranty;
+    s.files = collectCurrentFiles();
   }
   renderBidders();
   closeModal();
 }
 
+/* helper to collect files displayed in modal lists into object */
+function collectCurrentFiles(){
+  const groups = ['legal_business','legal_jv','legal_poas','fin_report','fin_statement','tech_sot','tech_catalogue','tech_cert','comm_app','comm_boq','comm_contracts','comm_warranty'];
+  const out = {};
+  groups.forEach(g=>{
+    const list = document.getElementById('list_'+g);
+    const names = Array.from(list.querySelectorAll('li')).map(li=>li.textContent);
+    if(names.length) out[g]=names;
+  });
+  return out;
+}
+
+/* file upload triggers */
+function triggerFile(id){
+  document.getElementById(id).click();
+}
+function handleFileInputChange(ev){
+  const input = ev.target;
+  const group = input.dataset.group;
+  const files = Array.from(input.files || []);
+  if(!group) return;
+  const listEl = document.getElementById('list_'+group);
+  // append filenames to list (demo). In real app upload to server and store URLs.
+  files.forEach(f=>{
+    const li = document.createElement('li');
+    li.textContent = f.name;
+    listEl.appendChild(li);
+  });
+  // clear input to allow re-upload same name if needed
+  input.value = '';
+}
+
 /* ---------- Events ---------- */
 document.addEventListener('DOMContentLoaded', ()=>{
+  // assign file input change handlers
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  fileInputs.forEach(fi=>fi.addEventListener('change', handleFileInputChange));
+
   // initialize header values
   document.getElementById('packageNo').value = state.meeting.package_no;
   document.getElementById('packageTitle').value = state.meeting.package_title;
@@ -508,21 +667,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
   // save draft
   document.getElementById('saveDraft').addEventListener('click', ()=>{
-    // In real app: POST to backend. Here just show console
     console.log('Save draft payload:', JSON.stringify({meeting: state.meeting, submissions: state.submissions}, null,2));
     alert('Đã lưu nháp (demo). Xem console để lấy payload JSON.');
   });
-  // export json
-  document.getElementById('downloadJson').addEventListener('click', ()=>{
+  // export json/csv
+  document.getElementById('downloadJson')?.addEventListener('click', ()=>{
     const blob = new Blob([JSON.stringify({meeting: state.meeting, submissions: state.submissions}, null,2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'meeting_1001.json'; a.click(); URL.revokeObjectURL(url);
   });
-  document.getElementById('downloadCsv').addEventListener('click', ()=>{
-    // build CSV from submissions
-    const rows = [['submission_id','bidder_name','method','price_application_usd','price_fob_usd','price_freight_ins_usd','price_cif_usd','validity_days','validity_from']];
+  document.getElementById('downloadCsv')?.addEventListener('click', ()=>{
+    const rows = [['submission_id','bidder_name','method','price_application_usd','price_fob_usd','price_freight_ins_usd','price_cif_usd','validity_days','validity_from','files']];
     state.submissions.forEach(s=>{
-      rows.push([s.submission_id, `"${s.bidder_name}"`, s.method||'', s.price_application_usd||'', s.price_fob_usd||'', s.price_freight_ins_usd||'', s.price_cif_usd||'', s.validity_days||'', s.validity_from||'']);
+      rows.push([s.submission_id, `"${s.bidder_name}"`, s.method||'', s.price_application_usd||'', s.price_fob_usd||'', s.price_freight_ins_usd||'', s.price_cif_usd||'', s.validity_days||'', s.validity_from||'', JSON.stringify(s.files||{})]);
     });
     const csv = rows.map(r=>r.join(',')).join('\n');
     const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
@@ -530,23 +687,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
   // generate PDF -> use print for demo
   document.getElementById('generatePdf').addEventListener('click', ()=>{
-    // validation: header fields required, at least 1 submission
     const pkg = document.getElementById('packageNo').value.trim();
     const closing = document.getElementById('bidClosing').value;
     const opening = document.getElementById('openingAt').value;
     if(!pkg || !closing || !opening){ alert('Thiếu thông tin Header: Package No., Bid Closing hoặc Opening time.'); return; }
     if(state.submissions.length===0){ alert('Cần ít nhất 1 hồ sơ dự thầu để tạo biên bản.'); return; }
-    // update meeting data from header inputs (demo)
     state.meeting.package_no = document.getElementById('packageNo').value;
     state.meeting.package_title = document.getElementById('packageTitle').value;
     state.meeting.location_name = document.getElementById('locationName').value;
     state.meeting.location_address = document.getElementById('locationAddress').value;
-    // print (dev: this prints the current page, in real app generate PDF template server-side)
     window.print();
   });
 });
 
-/* allow opening modal by calling openModalFor(null) */
+/* allow closing modal by clicking backdrop */
 document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
   if(e.target === document.getElementById('modalBackdrop')) closeModal();
 });
