@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<title>Đánh giá Đầu tư — Price Matrix + Summaries + Conclusion</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  body{font-family:Inter,Arial,sans-serif;background:#f6f8fb;margin:0}
+  header{background:#0b5cff;color:#fff;padding:12px 18px;font-weight:600}
+  .wrap{max-width:1300px;margin:18px auto;padding:0 12px}
+  .section{background:#fff;border-radius:8px;padding:14px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+  h2{color:#0b5cff;margin:0 0 8px 0}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px;border:1px solid #eef1f6;text-align:left;font-size:13px;vertical-align:top}
+  th{background:#f1f6ff;color:#0b5cff}
+  .status.pass{color:green;font-weight:700}
+  .status.fail{color:#b53b3b;font-weight:700}
+  .status.pending{color:#6b7280;font-weight:700}
+  input[type="text"], textarea, select {width:100%;padding:8px;border:1px solid #d8e2ee;border-radius:6px;font-size:13px}
+  .small{font-size:13px;color:#6b7280}
+  .flex{display:flex;gap:12px;align-items:center}
+  .right{display:flex;gap:8px;justify-content:flex-end}
+  .btn{background:#0b5cff;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
+  .btn.secondary{background:#6c757d}
+  .matrix-scroll{overflow:auto;max-height:360px}
+  .totals-row{background:#fbfdff;font-weight:700}
+  .muted{color:#6b7280}
+  .note{font-size:13px;color:#1f2937;margin-top:8px}
+</style>
+</head>
+<body>
+<header>Đánh giá Đầu tư — Price Matrix + Summaries + Conclusion</header>
+<div class="wrap">
+
+  <!-- 1) Bidders summary table -->
+  <div class="section">
+    <h2>1. Summaries — Legal / Finance / Technical (per bidder)</h2>
+    <div class="small muted">Click vào hàng để chọn bidder và điền phụ lục + nhận xét.</div>
+    <div style="margin-top:10px" class="matrix-scroll">
+      <table id="summariesTable">
+        <thead>
+          <tr><th style="width:220px">Bidder</th><th>Legal (summary)</th><th>Finance (summary)</th><th>Technical (summary)</th><th style="width:100px">Ready</th></tr>
+        </thead>
+        <tbody id="summariesBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2) Price matrix -->
+  <div class="section" id="matrixSection" style="display:none">
+    <h2>2. Phụ lục tách giá (Price Matrix)</h2>
+    <div class="small muted">Hàng ngang = procurement item. Cột bidder chứa Unit price (input) và total (auto). Footer shows totals per bidder.</div>
+    <div style="margin-top:10px" class="matrix-scroll">
+      <table id="matrixTable">
+        <!-- header built dynamically -->
+      </table>
+    </div>
+    <div style="margin-top:8px" class="flex">
+      <div style="flex:1">
+        <label>Default currency</label>
+        <select id="currencySelect"><option>USD</option><option>EUR</option></select>
+      </div>
+      <div style="flex:2"></div>
+    </div>
+    <div class="note" id="matrixNote"></div>
+  </div>
+
+  <!-- 3) Investment comments -->
+  <div class="section" id="commentsSection" style="display:none">
+    <h2>3. Nhận xét (Phòng Đầu tư)</h2>
+    <div class="grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label>The price — Giá chào</label>
+        <textarea id="comment_price" rows="3" placeholder="Nhập nhận xét về giá..."></textarea>
+      </div>
+      <div>
+        <label>Delivery term — Điều kiện giao hàng</label>
+        <textarea id="comment_delivery" rows="3" placeholder="Nhập nhận xét về điều kiện giao hàng..."></textarea>
+      </div>
+      <div>
+        <label>Payment term — Điều kiện thanh toán</label>
+        <textarea id="comment_payment" rows="3" placeholder="Nhập nhận xét..."></textarea>
+      </div>
+      <div>
+        <label>Warranty term — Thời hạn bảo hành</label>
+        <textarea id="comment_warranty" rows="3" placeholder="Nhập nhận xét..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4) Conclusion -->
+  <div class="section" id="conclusionSection" style="display:none">
+    <h2>4. Kết luận lựa chọn nhà thầu</h2>
+    <div class="flex" style="align-items:center">
+      <div style="flex:1">
+        <label>Chọn nhà thầu được đề xuất</label>
+        <select id="selectWinner"><option value="">-- Chọn --</option></select>
+      </div>
+      <div style="width:220px">
+        <label>Trạng thái precheck</label>
+        <div id="precheckStatus" class="small muted">Chưa chọn bidder</div>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label>Kết luận (bắt buộc khi nộp, tối thiểu 20 ký tự)</label>
+      <textarea id="decisionText" rows="4" placeholder="Viết kết luận..."></textarea>
+    </div>
+
+    <div class="right" style="margin-top:12px">
+      <button class="btn secondary" id="saveDraftBtn">Lưu nháp</button>
+      <button class="btn" id="submitBtn">Nộp kết luận</button>
+    </div>
+    <div id="submitMsg" class="note"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------- Demo data (server should provide these) ---------- */
+const bidders = [
+  { bidder_id:'BIDDER_A', bidder_name:'Bidder A' },
+  { bidder_id:'BIDDER_B', bidder_name:'Bidder B' },
+  { bidder_id:'BIDDER_C', bidder_name:'Bidder C' }
+];
+
+const aggregated_summaries = [
+  {bidder_id:'BIDDER_A', bidder_name:'Bidder A',
+    legal:{is_submitted:true,status:'pass',summary_sentence:'In terms of legal capability: Bidder A meets the requirement.'},
+    finance:{is_submitted:true,status:'pass',summary_sentence:'In terms of finance capability: Bidder A meets the requirement.'},
+    technical:{is_submitted:true,status:'pass',summary_sentence:'In terms of Technical assessment: Bidder A meets requirement.'}
+  },
+  {bidder_id:'BIDDER_B', bidder_name:'Bidder B',
+    legal:{is_submitted:true,status:'fail',summary_sentence:'In terms of legal capability: Bidder B does not meet the requirement. Reason: missing POA.'},
+    finance:{is_submitted:true,status:'pass',summary_sentence:'In terms of finance capability: Bidder B meets the requirement.'},
+    technical:{is_submitted:true,status:'pass',summary_sentence:'In terms of Technical assessment: Bidder B meets requirement.'}
+  },
+  {bidder_id:'BIDDER_C', bidder_name:'Bidder C',
+    legal:{is_submitted:false,status:'draft',summary_sentence:''},
+    finance:{is_submitted:false,status:'draft',summary_sentence:''},
+    technical:{is_submitted:false,status:'draft',summary_sentence:''}
+  }
+];
+
+const procurement_items = [
+  {row_no:1, procurement_item_id:'ITM-01', item_description:'Motor 5HP', unit:'pcs', quantity:10, budget_usd:1200},
+  {row_no:2, procurement_item_id:'ITM-02', item_description:'Control Panel', unit:'set', quantity:2, budget_usd:2000},
+  {row_no:3, procurement_item_id:'ITM-03', item_description:'Filter', unit:'pcs', quantity:50, budget_usd:500}
+];
+
+/* price_matrix initial: empty values */
+let price_matrix = procurement_items.map(it=>{
+  return {...it, bidders:{}};
+});
+
+/* freight by bidder (editable footer) */
+let freight_by_bidder = {}; // bidder_id -> numeric
+
+/* computed totals cache */
+let computed_totals = {}; // bidder_id -> {total_fob, freight, total_cif}
+
+/* current selected bidder to edit */
+let currentBidderSelected = null;
+
+/* ---------- render summaries table ---------- */
+const summariesBody = document.getElementById('summariesBody');
+aggregated_summaries.forEach(b=>{
+  const tr = document.createElement('tr');
+  const ready = (b.legal.is_submitted && b.finance.is_submitted && b.technical.is_submitted) ? 'Ready' : 'Pending';
+  const readyClass = ready==='Ready' ? 'status pass' : 'status pending';
+  tr.innerHTML = `
+    <td style="font-weight:700;cursor:pointer" data-bid="${b.bidder_id}">${b.bidder_name}</td>
+    <td>${b.legal.is_submitted ? '<div class="'+(b.legal.status==='pass'?'status pass':'status fail')+'">'+(b.legal.status==='pass'?'Đạt':'Không đạt')+'</div><div class="small">'+escapeHtml(b.legal.summary_sentence)+'</div>' : '<div class="small muted">Chưa nộp</div>'}</td>
+    <td>${b.finance.is_submitted ? '<div class="'+(b.finance.status==='pass'?'status pass':'status fail')+'">'+(b.finance.status==='pass'?'Đạt':'Không đạt')+'</div><div class="small">'+escapeHtml(b.finance.summary_sentence)+'</div>' : '<div class="small muted">Chưa nộp</div>'}</td>
+    <td>${b.technical.is_submitted ? '<div class="'+(b.technical.status==='pass'?'status pass':'status fail')+'">'+(b.technical.status==='pass'?'Đạt':'Không đạt')+'</div><div class="small">'+escapeHtml(b.technical.summary_sentence)+'</div>' : '<div class="small muted">Chưa nộp</div>'}</td>
+    <td><div class="${readyClass}">${ready}</div></td>
+  `;
+  summariesBody.appendChild(tr);
+});
+
+/* click handler: select bidder row */
+summariesBody.addEventListener('click', (e)=>{
+  const td = e.target.closest('td');
+  if(!td) return;
+  const row = td.parentElement;
+  const bid = row.querySelector('td:first-child').dataset.bid;
+  if(!bid) return;
+  selectBidder(bid);
+});
+
+/* select bidder: show matrix + comments + conclusion panel */
+function selectBidder(bid){
+  currentBidderSelected = bid;
+  // show sections
+  document.getElementById('matrixSection').style.display='block';
+  document.getElementById('commentsSection').style.display='block';
+  document.getElementById('conclusionSection').style.display='block';
+
+  // populate bidder header and precheck
+  const b = aggregated_summaries.find(x=>x.bidder_id===bid);
+  const missing = [];
+  if(!b.legal.is_submitted) missing.push('Pháp chế');
+  if(!b.finance.is_submitted) missing.push('Tài chính');
+  if(!b.technical.is_submitted) missing.push('Kỹ thuật');
+  document.getElementById('precheckStatus').innerText = missing.length===0 ? 'Selected bidder ready to submit (all 3 summaries present)' : 'Pending — missing: '+missing.join(', ');
+
+  // build matrix table header with bidder columns
+  buildMatrixHeader();
+
+  // render rows: for each procurement item, show fields + inputs under selected bidder only? Requirement: price matrix has columns for all bidders.
+  renderMatrixRows();
+
+  // populate selectWinner dropdown
+  const sel = document.getElementById('selectWinner');
+  sel.innerHTML = '<option value="">-- Chọn --</option>';
+  aggregated_summaries.forEach(x=> sel.appendChild(new Option(x.bidder_name, x.bidder_id)));
+}
+
+/* helper to build matrix header */
+function buildMatrixHeader(){
+  const table = document.getElementById('matrixTable');
+  table.innerHTML = '';
+  // header row: item cols + for each bidder two columns (unit price, total)
+  const thead = document.createElement('thead');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<th style="width:40px">No.</th><th>Item</th><th style="width:80px">Unit</th><th style="width:80px">Qty</th><th style="width:120px">Budget</th>`;
+  bidders.forEach(b=> { tr.innerHTML += `<th colspan="2" style="text-align:center">${escapeHtml(b.bidder_name)}</th>`; });
+  thead.appendChild(tr);
+  table.appendChild(thead);
+}
+
+/* render matrix rows */
+function renderMatrixRows(){
+  const table = document.getElementById('matrixTable');
+  // remove old tbody if any
+  const old = table.querySelector('tbody');
+  if(old) old.remove();
+  const tbody = document.createElement('tbody');
+
+  procurement_items.forEach((it, idx)=>{
+    // ensure price_matrix row exists
+    if(!price_matrix[idx]) price_matrix[idx] = {...it, bidders:{}};
+    const row = document.createElement('tr');
+    let inner = `<td>${it.row_no}</td><td>${escapeHtml(it.item_description)}</td><td>${it.unit}</td><td>${it.quantity}</td><td>${it.budget_usd.toFixed(2)}</td>`;
+    bidders.forEach(b=>{
+      const cellIdUnit = `unit_${it.procurement_item_id}_${b.bidder_id}`;
+      const saved = (price_matrix[idx].bidders && price_matrix[idx].bidders[b.bidder_id]) ? price_matrix[idx].bidders[b.bidder_id].unit_price : '';
+      inner += `<td><input type="text" id="${cellIdUnit}" data-row="${idx}" data-bid="${b.bidder_id}" value="${saved!==''?Number(saved).toFixed(2):''}" oninput="onUnitPriceInput(event)"/></td>`;
+      const totalVal = (price_matrix[idx].bidders && price_matrix[idx].bidders[b.bidder_id]) ? Number(price_matrix[idx].bidders[b.bidder_id].total_price).toFixed(2) : '0.00';
+      inner += `<td class="row-total" data-row="${idx}" data-bid="${b.bidder_id}">${totalVal}</td>`;
+    });
+    row.innerHTML = inner;
+    tbody.appendChild(row);
+  });
+
+  // footer totals row
+  const foot = document.createElement('tr');
+  foot.className='totals-row';
+  let footHtml = `<td></td><td style="text-align:right">TOTAL FOB</td><td></td><td></td><td></td>`;
+  bidders.forEach(b=>{
+    footHtml += `<td style="text-align:center">—</td><td id="total_fob_${b.bidder_id}">0.00</td>`;
+  });
+  foot.innerHTML = footHtml;
+  tbody.appendChild(foot);
+
+  // freight row (editable per bidder)
+  const freightRow = document.createElement('tr');
+  let freightHtml = `<td></td><td style="text-align:right">Freight + Insurance</td><td></td><td></td><td></td>`;
+  bidders.forEach(b=>{
+    freightHtml += `<td style="text-align:center">—</td><td><input type="text" id="freight_${b.bidder_id}" value="" oninput="onFreightInput(event)" placeholder="0.00" /></td>`;
+  });
+  freightRow.innerHTML = freightHtml;
+  tbody.appendChild(freightRow);
+
+  // total CIF row
+  const cifRow = document.createElement('tr');
+  cifRow.className='totals-row';
+  let cifHtml = `<td></td><td style="text-align:right">TOTAL CIF</td><td></td><td></td><td></td>`;
+  bidders.forEach(b=>{
+    cifHtml += `<td style="text-align:center">—</td><td id="total_cif_${b.bidder_id}">0.00</td>`;
+  });
+  cifRow.innerHTML = cifHtml;
+  tbody.appendChild(cifRow);
+
+  table.appendChild(tbody);
+
+  // initial compute
+  recomputeAllTotals();
+}
+
+/* on unit price input */
+function onUnitPriceInput(ev){
+  const input = ev.target;
+  const rowIdx = Number(input.dataset.row);
+  const bidderId = input.dataset.bid;
+  const qty = procurement_items[rowIdx].quantity;
+  const val = parseFloat(input.value.replace(/,/g,'')) || 0;
+  // set into price_matrix
+  price_matrix[rowIdx].bidders = price_matrix[rowIdx].bidders || {};
+  price_matrix[rowIdx].bidders[bidderId] = price_matrix[rowIdx].bidders[bidderId] || {};
+  price_matrix[rowIdx].bidders[bidderId].unit_price = val;
+  price_matrix[rowIdx].bidders[bidderId].total_price = +(val * qty).toFixed(2);
+  // update row total cell
+  const rowTotalCell = document.querySelector(`.row-total[data-row="${rowIdx}"][data-bid="${bidderId}"]`);
+  if(rowTotalCell) rowTotalCell.innerText = (val * qty).toFixed(2);
+  recomputeAllTotals();
+}
+
+/* on freight input */
+function onFreightInput(ev){
+  const id = ev.target.id; // freight_BIDDER_A
+  const bidderId = id.split('_')[1];
+  const val = parseFloat(ev.target.value.replace(/,/g,'')) || 0;
+  freight_by_bidder[bidderId] = val;
+  recomputeAllTotals();
+}
+
+/* recompute all totals per bidder */
+function recomputeAllTotals(){
+  computed_totals = {};
+  bidders.forEach(b=>{
+    let totalFob = 0;
+    price_matrix.forEach(row=>{
+      if(row.bidders && row.bidders[b.bidder_id] && row.bidders[b.bidder_id].total_price){
+        totalFob += Number(row.bidders[b.bidder_id].total_price) || 0;
+      }
+    });
+    const freight = freight_by_bidder[b.bidder_id] || 0;
+    const totalCif = +(totalFob + freight).toFixed(2);
+    computed_totals[b.bidder_id] = { total_fob: +totalFob.toFixed(2), freight: +freight.toFixed(2), total_cif: totalCif };
+    // write into DOM
+    const fElem = document.getElementById(`total_fob_${b.bidder_id}`);
+    const cElem = document.getElementById(`total_cif_${b.bidder_id}`);
+    if(fElem) fElem.innerText = computed_totals[b.bidder_id].total_fob.toFixed(2);
+    if(cElem) cElem.innerText = computed_totals[b.bidder_id].total_cif.toFixed(2);
+  });
+}
+
+/* Save draft -> simulate API call */
+document.getElementById('saveDraftBtn').addEventListener('click', ()=>{
+  // collect payload
+  const payload = collectPayload(false);
+  console.log('Save draft payload', payload);
+  alert('Đã lưu nháp (demo). Trong production sẽ gọi API để persist.');
+});
+
+/* Submit final -> run client precheck, then simulate API call */
+document.getElementById('submitBtn').addEventListener('click', ()=>{
+  const winner = document.getElementById('selectWinner').value;
+  const decisionText = document.getElementById('decisionText').value.trim();
+  if(!winner){ if(!confirm('Chưa chọn nhà thầu được đề xuất. Có muốn tiếp tục?')) return; }
+  if(decisionText.length < 20){ alert('Kết luận phải ít nhất 20 ký tự.'); return; }
+  // authoritative check: ensure selected bidder has 3 summaries submitted
+  const agg = aggregated_summaries.find(x=>x.bidder_id===winner);
+  const missing = [];
+  if(!agg) { alert('Selected bidder invalid.'); return; }
+  if(!agg.legal.is_submitted) missing.push('Pháp chế');
+  if(!agg.finance.is_submitted) missing.push('Tài chính');
+  if(!agg.technical.is_submitted) missing.push('Kỹ thuật');
+  if(missing.length>0) { alert('Không thể nộp: nhà thầu chưa có summary từ: ' + missing.join(', ')); return; }
+
+  // check appendix coverage: all procurement items must have value for selected bidder? (policy can be relaxed)
+  let missingPrices = [];
+  price_matrix.forEach((r, idx)=>{
+    const cell = r.bidders && r.bidders[winner] && (typeof r.bidders[winner].unit_price === 'number');
+    if(!cell) missingPrices.push(r.procurement_item_id);
+  });
+  if(missingPrices.length>0){
+    if(!confirm('Một số hàng chưa có giá cho nhà thầu chọn: ' + missingPrices.join(', ') + '. Tiếp tục nộp?')) return;
+  }
+
+  // build payload and simulate submit
+  const payload = collectPayload(true);
+  console.log('Submit payload (demo):', payload);
+  alert('Đã nộp kết luận (demo). Server sẽ validate chính thức và persist.'); 
+  // disable submit
+  document.getElementById('submitBtn').disabled = true;
+});
+
+/* collect payload */
+function collectPayload(isSubmit){
+  return {
+    rfp_id: 'RFP-2025-001',
+    aggregated_summaries: aggregated_summaries,
+    price_matrix: price_matrix,
+    freight_by_bidder: freight_by_bidder,
+    computed_totals: computed_totals,
+    investment_comments: {
+      price: document.getElementById('comment_price').value,
+      delivery: document.getElementById('comment_delivery').value,
+      payment: document.getElementById('comment_payment').value,
+      warranty: document.getElementById('comment_warranty').value
+    },
+    selected_bidder_id: document.getElementById('selectWinner').value,
+    decision_text: document.getElementById('decisionText').value,
+    is_submitted: isSubmit
+  };
+}
+
+/* helper escape */
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll('<','‹').replaceAll('>','›'); }
+
+/* init: when page loaded, build default matrix header and populate selectWinner */
+(function init(){
+  // populate bidders in select winner
+  const sel = document.getElementById('selectWinner');
+  bidders.forEach(b=> sel.appendChild(new Option(b.bidder_name, b.bidder_id)));
+})();
+</script>
+</body>
+</html>

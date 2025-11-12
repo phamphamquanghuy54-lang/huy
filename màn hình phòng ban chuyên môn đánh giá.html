@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Wireframe - Đánh giá Kỹ Thuật (v2) - Hàng mẫu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background:#f5f7fb; margin:0; }
+    header { background:#1d3557; color:white; padding:14px 20px; font-size:18px; font-weight:600; }
+    .container { display:flex; height: calc(100vh - 56px); }
+    .left { width:260px; background:white; border-right:1px solid #e6e9ef; overflow:auto; }
+    .left .bidder { padding:14px 16px; border-bottom:1px solid #f0f2f5; cursor:pointer; }
+    .left .bidder:hover { background:#fafbff; }
+    .main { flex:1; padding:18px; overflow:auto; }
+    .panel { background:white; border-radius:8px; padding:16px; margin-bottom:16px; box-shadow:0 1px 4px rgba(20,30,50,0.04); }
+    h3 { margin:0 0 8px 0; color:#1d3557; font-size:16px; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    th, td { border:1px solid #eef1f6; padding:8px; text-align:left; font-size:13px; }
+    label { display:block; margin-top:10px; font-weight:600; font-size:13px; }
+    select, textarea, input[type="text"], input[type="file"] { width:100%; padding:8px; border:1px solid #d8e0ee; border-radius:6px; margin-top:6px; font-size:13px; }
+    .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+    .btn { background:#1d3557; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; }
+    .btn.secondary { background:#6c757d; }
+    .warning { color:#b53b3b; font-weight:700; margin-top:8px; }
+    .summary { background:#f8fbff; padding:12px; border-radius:6px; }
+    .muted { color:#6b7280; font-size:13px; }
+    .inline { display:flex; gap:8px; align-items:center; }
+    .file-list { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+    .file-item { padding:8px; border:1px solid #eef1f6; border-radius:6px; display:flex; justify-content:space-between; align-items:center; }
+    .thumb-row { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+    .thumb { width:120px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #e6eef8; }
+    .small-muted { font-size:12px; color:#6b7280; }
+  </style>
+</head>
+<body>
+  <header>Đánh giá Kỹ Thuật — Gói thầu #RFP-2025-001</header>
+  <div class="container">
+    <div class="left">
+      <div class="bidder"><strong>Bidder A</strong><div class="muted">Đang đánh giá</div></div>
+      <div class="bidder"><strong>Bidder B</strong><div class="muted">Chưa bắt đầu</div></div>
+      <div class="bidder"><strong>Bidder C</strong><div class="muted">Đã nộp</div></div>
+    </div>
+
+    <div class="main">
+      <div class="panel">
+        <h3>Tài liệu kỹ thuật (bắt buộc)</h3>
+        <div class="muted">Yêu cầu: Statement of Technical Compliance + Datasheet/Catalogue. (Giấy chứng nhận chất lượng & hàng mẫu nếu có).</div>
+
+        <table>
+          <thead>
+            <tr><th>Tài liệu</th><th>Năm/Loại</th><th>Trạng thái</th><th>Hành động</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Statement of Technical Compliance</td>
+              <td>-</td>
+              <td>Đã có</td>
+              <td><button class="btn">Xem</button> <button class="btn secondary">Tải</button></td>
+            </tr>
+            <tr>
+              <td>Datasheet / Catalogue (chi tiết)</td>
+              <td>-</td>
+              <td>Đã có</td>
+              <td><button class="btn">Xem</button> <button class="btn secondary">Tải</button></td>
+            </tr>
+            <tr>
+              <td>Giấy chứng nhận chất lượng</td>
+              <td>-</td>
+              <td>Không có</td>
+              <td><button class="btn secondary">Thông báo</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div id="sample-section" style="margin-top:12px;">
+          <label>Hàng mẫu (nếu có theo RFP)</label>
+          <div class="inline" style="align-items:center;">
+            <div class="muted">RFP yêu cầu: Có</div>
+            <div style="flex:1"></div>
+            <div>
+              <label><input type="checkbox" id="sample_provided"> Hàng mẫu đã nộp</label>
+            </div>
+          </div>
+
+          <!-- Sample assessment block (shown only if sample_provided checked) -->
+          <div id="sample-assessment" style="display:none; margin-top:12px;">
+            <label>Đánh giá chất lượng hàng mẫu</label>
+            <div style="display:flex; gap:12px; margin-top:8px;">
+              <label><input type="radio" name="sample_result" value="pass"> Đạt</label>
+              <label><input type="radio" name="sample_result" value="fail"> Không đạt</label>
+            </div>
+
+            <label style="margin-top:10px;">Ảnh hàng mẫu (bắt buộc ít nhất 1 ảnh)</label>
+            <input type="file" id="sample_photos_input" accept="image/*" multiple />
+            <div class="thumb-row" id="sample-thumbs"></div>
+            <div class="small-muted">Gợi ý: chụp mặt trước, cạnh, nhãn mác, lỗi (nếu có).</div>
+
+            <label style="margin-top:10px;">Ghi chú hàng mẫu (kết luận/chi tiết)</label>
+            <textarea id="sample_notes" rows="3" placeholder="Mô tả chi tiết về chất lượng mẫu..."></textarea>
+          </div>
+
+          <div class="warning" id="missing-doc-warning" style="display:none;">
+            Thiếu tài liệu bắt buộc (Statement hoặc Datasheet) — không thể chọn "Đạt".
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Đánh giá kỹ thuật</h3>
+
+        <label>Kết luận</label>
+        <div style="display:flex; gap:12px; margin-top:8px;">
+          <label><input type="radio" name="status" value="pass"> Đạt</label>
+          <label><input type="radio" name="status" value="fail"> Không đạt</label>
+        </div>
+
+        <div id="fail-area" style="display:none;">
+          <label>Lý do (bắt buộc khi chọn "Không đạt")</label>
+          <textarea id="fail_reason" rows="4" placeholder="Nhập lý do (ít nhất 10 ký tự)"></textarea>
+        </div>
+
+        <label style="margin-top:12px;">Biên bản đánh giá kỹ thuật đã ký (bắt buộc khi nộp)</label>
+        <input type="file" id="signed_report_input" accept=".pdf,.jpg,.png" />
+        <div id="signed-file-list" class="file-list"></div>
+
+        <label style="margin-top:12px;">Nhận xét thêm (tuỳ chọn)</label>
+        <textarea id="remarks" rows="3" placeholder="Nhập nhận xét..."></textarea>
+
+        <div class="actions">
+          <button class="btn secondary" id="save-draft">Lưu nháp</button>
+          <button class="btn" id="submit-assessment">Nộp đánh giá</button>
+        </div>
+      </div>
+
+      <div class="panel summary">
+        <h3>Kết quả tóm tắt</h3>
+        <div id="summary-text"><strong>In terms of Technical assessment:</strong><br>1. Bidder A meets the technical requirement of RFP.</div>
+        <div style="margin-top:8px;">
+          <button class="btn secondary">Xuất biên bản (PDF)</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Lịch sử chỉnh sửa</h3>
+        <ul>
+          <li>12/11/2025 08:50 - Lưu nháp bởi Le Van C</li>
+          <li>12/11/2025 10:20 - Nộp đánh giá (Đạt)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Demo UI logic (prototype)
+    const docsPresent = { statement: true, datasheet: true }; // from server
+    const sampleRequired = true; // from RFP
+
+    const sampleCheckbox = document.getElementById('sample_provided');
+    const sampleAssessment = document.getElementById('sample-assessment');
+    const samplePhotosInput = document.getElementById('sample_photos_input');
+    const sampleThumbs = document.getElementById('sample-thumbs');
+    const submitBtn = document.getElementById('submit-assessment');
+    const signedInput = document.getElementById('signed_report_input');
+    const signedList = document.getElementById('signed-file-list');
+    const radios = document.getElementsByName('status');
+    const failArea = document.getElementById('fail-area');
+    const missingDocWarning = document.getElementById('missing-doc-warning');
+    const summaryText = document.getElementById('summary-text');
+
+    // show missing doc warning if required docs absent
+    if (!docsPresent.statement || !docsPresent.datasheet) {
+      missingDocWarning.style.display = 'block';
+      missingDocWarning.textContent = 'Thiếu tài liệu bắt buộc: Statement hoặc Datasheet — không được phép chọn "Đạt".';
+    }
+
+    // sample toggle
+    sampleCheckbox.addEventListener('change', () => {
+      if (sampleCheckbox.checked) {
+        sampleAssessment.style.display = 'block';
+      } else {
+        sampleAssessment.style.display = 'none';
+        sampleThumbs.innerHTML = '';
+        samplePhotosInput.value = '';
+      }
+    });
+
+    // preview sample photos thumbnails
+    samplePhotosInput.addEventListener('change', (e) => {
+      sampleThumbs.innerHTML = '';
+      Array.from(e.target.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.className = 'thumb';
+          sampleThumbs.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // signed report preview list
+    signedInput.addEventListener('change', (e) => {
+      signedList.innerHTML = '';
+      Array.from(e.target.files).forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = `${f.name} <button class="btn secondary" onclick="alert('Preview demo')">Xem</button>`;
+        signedList.appendChild(div);
+      });
+    });
+
+    // status radio logic
+    Array.from(radios).forEach(r => r.addEventListener('change', () => {
+      if (r.value === 'fail' && r.checked) failArea.style.display = 'block';
+      if (r.value === 'pass' && r.checked) failArea.style.display = 'none';
+    }));
+
+    // submit proto with validations (client-side)
+    submitBtn.addEventListener('click', () => {
+      const status = Array.from(radios).find(r => r.checked)?.value;
+      const failReason = document.getElementById('fail_reason')?.value.trim() || '';
+      const signedFilesCount = signedInput.files.length;
+      const sampleProvided = sampleCheckbox.checked;
+      const sampleResult = sampleProvided ? Array.from(document.getElementsByName('sample_result')).find(r => r.checked)?.value : null;
+      const samplePhotosCount = samplePhotosInput.files.length;
+
+      if (!status) { alert('Vui lòng chọn kết luận.'); return; }
+
+      // docs presence check
+      if (status === 'pass' && (!docsPresent.statement || !docsPresent.datasheet)) {
+        alert('Không thể chọn Đạt khi thiếu tài liệu bắt buộc.'); return;
+      }
+
+      // sample rules
+      if (sampleRequired && !sampleProvided) {
+        alert('Gói thầu yêu cầu hàng mẫu — vui lòng xác nhận hàng mẫu đã nộp trước khi nộp.'); return;
+      }
+      if (sampleProvided) {
+        if (!sampleResult) { alert('Vui lòng đánh giá chất lượng hàng mẫu (Đạt / Không đạt).'); return; }
+        if (samplePhotosCount === 0) { alert('Vui lòng upload ít nhất 1 ảnh hàng mẫu làm minh chứng.'); return; }
+      }
+
+      if (status === 'fail' && failReason.length < 10) { alert('Lý do phải có ít nhất 10 ký tự.'); return; }
+      if (signedFilesCount === 0) { alert('Phải đính kèm biên bản đánh giá kỹ thuật đã ký trước khi nộp.'); return; }
+
+      // build summary
+      const bidder = 'Bidder A';
+      if (status === 'pass') {
+        summaryText.innerHTML = '<strong>In terms of Technical assessment:</strong><br>1. ' + bidder + ' meets the technical requirement of RFP.';
+      } else {
+        summaryText.innerHTML = '<strong>In terms of Technical assessment:</strong><br>1. ' + bidder + ' does not meet the technical requirement. Reason: ' + failReason;
+      }
+
+      // collect sample fields (client demo)
+      const sample = sampleProvided ? {
+        sample_provided: true,
+        sample_quality_assessed: true,
+        sample_quality_result: sampleResult,
+        sample_photos_count: samplePhotosCount,
+        sample_notes: document.getElementById('sample_notes').value.trim()
+      } : { sample_provided: false };
+
+      console.log('Submitting (demo):', { status, sample, signedFilesCount });
+      alert('Đã nộp đánh giá (demo). Hệ thống sẽ gọi API để lưu, upload file và sinh summary.');
+    });
+  </script>
+</body>
+</html>

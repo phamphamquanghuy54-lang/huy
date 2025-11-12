@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Wireframe - Màn hình Đánh giá Pháp Chế</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+    header { background: #1d3557; color: white; padding: 16px 24px; font-size: 20px; font-weight: bold; }
+    main { display: flex; height: calc(100vh - 80px); }
+    aside { width: 25%; background: #ffffff; border-right: 1px solid #dee2e6; overflow-y: auto; }
+    section { flex: 1; padding: 20px; overflow-y: auto; }
+    .bidder-list { padding: 8px 16px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .bidder-list:hover { background: #f1f3f5; }
+    .panel { background: white; border-radius: 8px; margin-bottom: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .panel h3 { margin-top: 0; font-size: 16px; color: #1d3557; }
+    label { font-weight: bold; display: block; margin-top: 8px; }
+    textarea, select, input[type="text"] { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px; }
+    .btn-bar { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+    button { background: #1d3557; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #457b9d; }
+    .doc-list table { width: 100%; border-collapse: collapse; }
+    .doc-list th, .doc-list td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    footer { background: #fff; border-top: 1px solid #dee2e6; padding: 12px 24px; text-align: right; }
+  </style>
+</head>
+<body>
+  <header>Đánh giá Pháp Chế — Gói thầu #RFP-2025-001</header>
+  <main>
+    <aside>
+      <div class="bidder-list"><strong>Bidder A</strong><br><small>Đang đánh giá</small></div>
+      <div class="bidder-list"><strong>Bidder B</strong><br><small>Chưa bắt đầu</small></div>
+      <div class="bidder-list"><strong>Bidder C</strong><br><small>Đã nộp</small></div>
+    </aside>
+    <section>
+      <div class="panel">
+        <h3>Tài liệu pháp lý yêu cầu</h3>
+        <div class="doc-list">
+          <table>
+            <tr><th>Tài liệu</th><th>Trạng thái</th><th>Hành động</th></tr>
+            <tr><td>Giấy phép kinh doanh</td><td>Đã có</td><td><button>Xem</button></td></tr>
+            <tr><td>Thỏa thuận liên doanh</td><td>Chưa có</td><td><button>Thông báo</button></td></tr>
+            <tr><td>Thư ủy quyền</td><td>Đã có</td><td><button>Xem</button></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Đánh giá pháp chế</h3>
+        <label>Kết luận</label>
+        <select>
+          <option value="">-- Chọn --</option>
+          <option>Đạt</option>
+          <option>Không đạt</option>
+        </select>
+        <label>Lý do (nếu không đạt)</label>
+        <textarea rows="3" placeholder="Nhập lý do..."></textarea>
+        <div class="btn-bar">
+          <button>Lưu nháp</button>
+          <button>Nộp đánh giá</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Kết quả tóm tắt</h3>
+        <p><strong>In terms of legal capability:</strong><br>Bidder A meets the requirement of RFP.</p>
+        <button>Xuất biên bản</button>
+      </div>
+
+      <div class="panel">
+        <h3>Lịch sử chỉnh sửa</h3>
+        <ul>
+          <li>12/11/2025 09:12 - Lưu nháp bởi Nguyen Van A</li>
+          <li>12/11/2025 10:02 - Nộp đánh giá (Đạt)</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <button>Quay lại danh sách</button>
+  </footer>
+</body>
+</html>

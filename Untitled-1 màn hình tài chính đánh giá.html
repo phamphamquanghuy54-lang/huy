@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Wireframe - Đánh giá Tài Chính</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background:#f5f7fb; margin:0; }
+    header { background:#003049; color:white; padding:14px 20px; font-size:18px; font-weight:600; }
+    .container { display:flex; height: calc(100vh - 56px); }
+    .left { width:260px; background:white; border-right:1px solid #e6e9ef; overflow:auto; }
+    .left .bidder { padding:14px 16px; border-bottom:1px solid #f0f2f5; cursor:pointer; }
+    .left .bidder:hover { background:#fafbff; }
+    .main { flex:1; padding:18px; overflow:auto; }
+    .panel { background:white; border-radius:8px; padding:16px; margin-bottom:16px; box-shadow:0 1px 4px rgba(20,30,50,0.04); }
+    h3 { margin:0 0 8px 0; color:#003049; font-size:16px; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    th, td { border:1px solid #eef1f6; padding:8px; text-align:left; font-size:13px; }
+    label { display:block; margin-top:10px; font-weight:600; font-size:13px; }
+    select, textarea, input[type="text"] { width:100%; padding:8px; border:1px solid #d8e0ee; border-radius:6px; margin-top:6px; font-size:13px; }
+    .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+    .btn { background:#003049; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; }
+    .btn.secondary { background:#6c757d; }
+    .warning { color:#b53b3b; font-weight:600; margin-top:8px; }
+    .summary { background:#f8fbff; padding:12px; border-radius:6px; }
+    .muted { color:#6b7280; font-size:13px; }
+  </style>
+</head>
+<body>
+  <header>Đánh giá Tài Chính — Gói thầu #RFP-2025-001</header>
+  <div class="container">
+    <div class="left">
+      <div class="bidder"><strong>Bidder A</strong><div class="muted">Đang đánh giá</div></div>
+      <div class="bidder"><strong>Bidder B</strong><div class="muted">Chưa bắt đầu</div></div>
+      <div class="bidder"><strong>Bidder C</strong><div class="muted">Đã nộp</div></div>
+    </div>
+
+    <div class="main">
+      <div class="panel">
+        <h3>Tài liệu tài chính (bắt buộc)</h3>
+        <div class="muted">Hệ thống yêu cầu: Báo cáo tài chính 2 năm gần nhất + Financial Statement</div>
+
+        <table>
+          <thead>
+            <tr><th>Tài liệu</th><th>Năm</th><th>Trạng thái</th><th>Hành động</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Báo cáo tài chính (Full) - Audited</td>
+              <td>2024</td>
+              <td>Đã có</td>
+              <td><button class="btn">Xem</button> <button class="btn secondary">Tải</button></td>
+            </tr>
+            <tr>
+              <td>Báo cáo tài chính (Full) - Audited</td>
+              <td>2023</td>
+              <td>Đã có</td>
+              <td><button class="btn">Xem</button> <button class="btn secondary">Tải</button></td>
+            </tr>
+            <tr>
+              <td>Financial Statement (Summary)</td>
+              <td>-</td>
+              <td>Đã có</td>
+              <td><button class="btn">Xem</button> <button class="btn secondary">Tải</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="warning" id="missing-doc-warning" style="display:none;">
+          Một hoặc nhiều tài liệu bắt buộc đang thiếu — không thể chọn "Đạt".
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Đánh giá tài chính</h3>
+
+        <label>Kết luận</label>
+        <select id="assessment_status">
+          <option value="">-- Chọn --</option>
+          <option value="pass">Đạt</option>
+          <option value="fail">Không đạt</option>
+        </select>
+
+        <div id="fail-reason-area" style="display:none;">
+          <label>Lý do (bắt buộc khi chọn "Không đạt")</label>
+          <textarea id="fail_reason" rows="4" placeholder="Nhập lý do (ít nhất 10 ký tự)"></textarea>
+        </div>
+
+        <label>Nhận xét thêm (tuỳ chọn)</label>
+        <textarea id="remarks" rows="3" placeholder="Nhập nhận xét..."></textarea>
+
+        <div class="actions">
+          <button class="btn secondary" id="save-draft">Lưu nháp</button>
+          <button class="btn" id="submit-assessment">Nộp đánh giá</button>
+        </div>
+      </div>
+
+      <div class="panel summary">
+        <h3>Kết quả tóm tắt</h3>
+        <div id="summary-text"><strong>In terms of financial capability:</strong><br>Bidder A meets the financial requirement of RFP.</div>
+        <div style="margin-top:8px;">
+          <button class="btn secondary">Xuất biên bản (PDF)</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Lịch sử chỉnh sửa</h3>
+        <ul>
+          <li>12/11/2025 09:45 - Lưu nháp bởi Tran Thi B</li>
+          <li>12/11/2025 11:00 - Nộp đánh giá (Không đạt)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // JS demo logic (chỉ dùng trong prototype)
+    const statusEl = document.getElementById('assessment_status');
+    const reasonArea = document.getElementById('fail-reason-area');
+    const summaryText = document.getElementById('summary-text');
+    const submitBtn = document.getElementById('submit-assessment');
+
+    statusEl.addEventListener('change', () => {
+      if (statusEl.value === 'fail') {
+        reasonArea.style.display = 'block';
+      } else {
+        reasonArea.style.display = 'none';
+      }
+    });
+
+    submitBtn.addEventListener('click', () => {
+      const status = statusEl.value;
+      const reason = document.getElementById('fail_reason').value.trim();
+      if (!status) { alert('Vui lòng chọn kết luận.'); return; }
+      if (status === 'fail' && reason.length < 10) { alert('Lý do phải có ít nhất 10 ký tự.'); return; }
+
+      // Build summary (client side)
+      const bidder = 'Bidder A';
+      if (status === 'pass') {
+        summaryText.innerHTML = '<strong>In terms of financial capability:</strong><br>1. ' + bidder + ' meets the requirement of RFP.';
+      } else {
+        summaryText.innerHTML = '<strong>In terms of financial capability:</strong><br>1. ' + bidder + ' does not meet the requirement of RFP. Reason: ' + reason;
+      }
+      alert('Đã nộp đánh giá (demo). Hệ thống sẽ gọi API để lưu và sinh summary.');
+    });
+  </script>
+</body>
+</html>
