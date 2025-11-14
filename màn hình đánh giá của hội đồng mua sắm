@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<title>Upload báo cáo đánh giá HSDT — Hội đồng mua sắm</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  body{font-family:Inter,Arial,sans-serif;background:#f6f8fb;margin:0;padding:18px}
+  .card{background:#fff;padding:14px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,0.04);margin-bottom:12px}
+  h2{color:#0b5cff;margin:0 0 8px 0}
+  label{display:block;margin-top:10px;font-weight:600}
+  input[type=text], input[type=date], input[type=datetime-local], textarea, select {width:100%;padding:8px;border:1px solid #d8e2ee;border-radius:6px;margin-top:6px;box-sizing:border-box}
+  .muted{color:#6b7280;font-size:13px}
+  .row{display:flex;gap:12px}
+  .col{flex:1}
+  .small{font-size:13px;color:#6b7280}
+  .btn{background:#0b5cff;color:#fff;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;margin-right:8px}
+  .btn.secondary{background:#6c757d}
+  .inline{display:inline-block}
+  .readonly{background:#f3f5fb}
+  .log{background:#0b5cff;color:#fff;padding:6px;border-radius:4px;display:inline-block;margin-right:8px}
+  .audit{max-height:200px;overflow:auto;border:1px solid #eef1f6;padding:8px;border-radius:6px;background:#fbfdff}
+  .flex-right{display:flex;justify-content:flex-end;margin-top:12px}
+  .hidden{display:none}
+  .form-group{margin-bottom:8px}
+  .note{font-size:13px;color:#1f2937;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Upload báo cáo đánh giá HSDT (đã ký) — Tổ chuyên gia</h2>
+  <div class="small muted">RFP: <strong>RFP-2025-001</strong></div>
+
+  <label>1) Upload file báo cáo đánh giá HSDT (PDF ký)</label>
+  <input id="reportFile" type="file" accept=".pdf" />
+  <div class="muted small">Chỉ chấp nhận file PDF đã ký.</div>
+
+  <div style="margin-top:12px">
+    <button id="btnUpload" class="btn">Upload & Open Opinion Modal</button>
+    <span id="uploadStatus" class="small muted"></span>
+  </div>
+</div>
+
+<div id="opinionModal" class="card hidden">
+  <h2>Ý kiến hội đồng mua sắm</h2>
+  <div class="small muted">Một số trường mặc định không cho phép sửa.</div>
+
+  <!-- readonly defaults -->
+  <div class="row" style="margin-top:10px">
+    <div class="col">
+      <label>Đồng ý với báo cáo tổ chuyên gia</label>
+      <input id="agreeExpert" type="text" class="readonly" readonly value="Đồng ý (default)"/>
+    </div>
+    <div class="col">
+      <label>Nhà thầu được chọn vào đàm phán</label>
+      <input id="selectedBidder" type="text" class="readonly" readonly />
+    </div>
+  </div>
+
+  <label style="margin-top:12px">Mục tiêu đàm phán</label>
+  <div>
+    <label><input type="radio" name="obj" value="follow_rfp" checked /> 1) Giữ nguyên theo RFP (Follow RFP)</label><br/>
+    <label><input type="radio" name="obj" value="propose_new" /> 2) Đề xuất mục tiêu mới</label>
+  </div>
+
+  <div id="targetBlock" style="margin-top:8px">
+    <label>Target price (USD)</label>
+    <input id="targetPrice" type="text" />
+    <div class="muted small" id="targetHelp">Mặc định = Giá chào của nhà thầu × 95% (giảm 5%).</div>
+
+    <label style="margin-top:10px">Other terms</label>
+    <input id="otherTerms" type="text" value="Follow RFP" readonly class="readonly"/>
+  </div>
+
+  <div id="proposeBlock" class="hidden" style="margin-top:12px">
+    <label>Phạm vi cung cấp đề xuất</label>
+    <textarea id="proposedScope" rows="2"></textarea>
+
+    <label>Điều kiện thương mại đề xuất</label>
+    <textarea id="proposedCommercial" rows="2"></textarea>
+
+    <label>Điều kiện nghiệm thu đề xuất</label>
+    <textarea id="proposedAcceptance" rows="2"></textarea>
+
+    <label>Thời hạn bảo hành đề xuất</label>
+    <textarea id="proposedWarranty" rows="1"></textarea>
+  </div>
+
+  <label style="margin-top:12px">Ngày đàm phán dự kiến</label>
+  <input id="plannedDate" type="date" />
+
+  <div class="flex-right">
+    <button id="previewBtn" class="btn secondary">Preview tờ trình</button>
+    <button id="saveDraftBtn" class="btn secondary">Save Draft</button>
+    <button id="submitBtn" class="btn">Submit Final</button>
+  </div>
+
+  <div style="margin-top:12px">
+    <div class="note">Ghi chú: khi submit final, trường bắt buộc: target_price > 0; nếu chọn "Đề xuất mục tiêu mới" các trường đề xuất phải không rỗng; planned negotiation date phải được nhập và >= ngày hôm nay.</div>
+  </div>
+</div>
+
+<!-- Preview modal (simple) -->
+<div id="previewModal" class="card hidden">
+  <h2>Preview — Tờ trình đề nghị đàm phán</h2>
+  <div id="previewContent" style="white-space:pre-wrap"></div>
+  <div class="flex-right" style="margin-top:10px">
+    <button id="closePreview" class="btn secondary">Close</button>
+  </div>
+</div>
+
+<!-- Audit log -->
+<div class="card">
+  <h3>Audit log</h3>
+  <div class="audit" id="auditLog"></div>
+</div>
+
+<script>
+  // Demo sample selected bidder snapshot (in reality server provides)
+  const selectedBidderSnapshot = {
+    bidder_id: "BIDDER_A",
+    bidder_name: "DP International",
+    application_letter: 1309000, // USD
+    fob_price: 1287000,          // USD
+    freight: 11000,              // USD
+    cif_price: 1287000 + 11000   // = 1298000
+  };
+
+  // utilities
+  function logAction(action, note=''){
+    const ts = new Date().toLocaleString();
+    const el = document.getElementById('auditLog');
+    const entry = document.createElement('div');
+    entry.innerHTML = `<div><span class="log">${action}</span> <strong>${ts}</strong> - ${note}</div>`;
+    el.prepend(entry);
+  }
+
+  // set selected bidder field on open (simulate reading from assessment)
+  document.getElementById('selectedBidder').value = selectedBidderSnapshot.bidder_name;
+
+  // compute default target price
+  function computeDefaultTarget(){
+    const offer = selectedBidderSnapshot.cif_price || (selectedBidderSnapshot.fob_price + (selectedBidderSnapshot.freight||0));
+    const target = Math.round((offer * 0.95) * 100) / 100; // 5% discount
+    return target.toFixed(2);
+  }
+  document.getElementById('targetPrice').value = computeDefaultTarget();
+
+  // upload button logic
+  document.getElementById('btnUpload').addEventListener('click', ()=>{
+    const fileInput = document.getElementById('reportFile');
+    if(!fileInput.files || fileInput.files.length===0){
+      alert('Vui lòng chọn file PDF báo cáo đã ký trước khi upload.');
+      return;
+    }
+    const f = fileInput.files[0];
+    if(!f.name.toLowerCase().endsWith('.pdf')) {
+      alert('Chỉ chấp nhận file PDF.');
+      return;
+    }
+    // simulate upload
+    document.getElementById('uploadStatus').innerText = `Đã upload: ${f.name}`;
+    logAction('upload', `Uploaded report file: ${f.name}`);
+    // open modal
+    document.getElementById('opinionModal').classList.remove('hidden');
+    // prefill other values
+    document.getElementById('selectedBidder').value = selectedBidderSnapshot.bidder_name;
+    document.getElementById('targetPrice').value = computeDefaultTarget();
+  });
+
+  // radio toggle for negotiation objective
+  document.querySelectorAll('input[name="obj"]').forEach(r=>{
+    r.addEventListener('change', (e)=>{
+      const v = e.target.value;
+      if(v === 'follow_rfp'){
+        document.getElementById('proposeBlock').classList.add('hidden');
+        document.getElementById('otherTerms').value = 'Follow RFP';
+      } else {
+        document.getElementById('proposeBlock').classList.remove('hidden');
+        document.getElementById('otherTerms').value = '';
+      }
+    });
+  });
+
+  // Preview button
+  document.getElementById('previewBtn').addEventListener('click', ()=>{
+    // gather data
+    const data = gatherFormData();
+    const content = buildPreviewText(data);
+    document.getElementById('previewContent').innerText = content;
+    document.getElementById('previewModal').classList.remove('hidden');
+    logAction('preview', `Previewed draft for bidder ${data.selected_bidder_name}`);
+  });
+  document.getElementById('closePreview').addEventListener('click', ()=>{
+    document.getElementById('previewModal').classList.add('hidden');
+  });
+
+  // Save Draft
+  document.getElementById('saveDraftBtn').addEventListener('click', ()=>{
+    const data = gatherFormData();
+    // minimal validation: target price numeric
+    if(data.target_price && isNaN(Number(data.target_price))){
+      alert('Target price phải là số.');
+      return;
+    }
+    // simulate API call to save draft
+    console.log('Saving draft payload', data);
+    logAction('save_draft', `Draft saved for bidder ${data.selected_bidder_name}`);
+    alert('Đã lưu nháp (demo).');
+  });
+
+  // Submit Final
+  document.getElementById('submitBtn').addEventListener('click', ()=>{
+    const data = gatherFormData();
+    // validations on submit
+    const errors = [];
+    if(!data.report_uploaded) errors.push('Chưa upload báo cáo.');
+    if(!data.selected_bidder_id) errors.push('Không có nhà thầu được chọn.');
+    if(!data.target_price || isNaN(Number(data.target_price)) || Number(data.target_price) <= 0) errors.push('Target price phải là số > 0.');
+    if(data.negotiation_objective === 'propose_new'){
+      if(!data.proposed_scope) errors.push('Phạm vi cung cấp đề xuất trống.');
+      if(!data.proposed_commercial_terms) errors.push('Điều kiện thương mại đề xuất trống.');
+      if(!data.proposed_acceptance_terms) errors.push('Điều kiện nghiệm thu đề xuất trống.');
+      if(!data.proposed_warranty_terms) errors.push('Thời hạn bảo hành đề xuất trống.');
+    }
+    if(!data.planned_negotiation_date) errors.push('Chưa nhập ngày đàm phán dự kiến.');
+    else {
+      const d = new Date(data.planned_negotiation_date);
+      const today = new Date(); today.setHours(0,0,0,0);
+      if(d < today) errors.push('Ngày đàm phán dự kiến phải là hôm nay hoặc tương lai.');
+    }
+    if(errors.length){
+      alert('Không thể submit vì:\n- ' + errors.join('\n- '));
+      return;
+    }
+    // simulate server submit
+    console.log('Submitting final payload', data);
+    logAction('submit_final', `Submitted final opinion for bidder ${data.selected_bidder_name}`);
+    alert('Đã nộp kết luận chính thức (demo).');
+    // disable inputs after submit
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('saveDraftBtn').disabled = true;
+  });
+
+  // Gather form data into object
+  function gatherFormData(){
+    const obj = {};
+    obj.report_uploaded = !!(document.getElementById('reportFile').files && document.getElementById('reportFile').files.length>0);
+    obj.report_filename = obj.report_uploaded ? document.getElementById('reportFile').files[0].name : null;
+    obj.agree_with_expert = true;
+    obj.selected_bidder_id = selectedBidderSnapshot.bidder_id;
+    obj.selected_bidder_name = selectedBidderSnapshot.bidder_name;
+    obj.selected_bidder_offer = selectedBidderSnapshot;
+    const objRad = document.querySelector('input[name="obj"]:checked').value;
+    obj.negotiation_objective = objRad;
+    obj.target_price = document.getElementById('targetPrice').value.trim();
+    obj.other_terms = document.getElementById('otherTerms').value.trim();
+    obj.proposed_scope = document.getElementById('proposedScope').value.trim();
+    obj.proposed_commercial_terms = document.getElementById('proposedCommercial').value.trim();
+    obj.proposed_acceptance_terms = document.getElementById('proposedAcceptance').value.trim();
+    obj.proposed_warranty_terms = document.getElementById('proposedWarranty').value.trim();
+    obj.planned_negotiation_date = document.getElementById('plannedDate').value;
+    return obj;
+  }
+
+  // Build preview text
+  function buildPreviewText(d){
+    let out = '';
+    out += `RFP: RFP-2025-001\n`;
+    out += `Báo cáo: ${d.report_filename || '---'}\n`;
+    out += `Nhà thầu mời đàm phán: ${d.selected_bidder_name}\n\n`;
+    out += `Mục tiêu đàm phán: ${d.negotiation_objective === 'follow_rfp' ? 'Follow RFP' : 'Propose New'}\n`;
+    out += `Target price (USD): ${d.target_price}\n`;
+    out += `Other terms: ${d.other_terms}\n\n`;
+    if(d.negotiation_objective === 'propose_new'){
+      out += `Phạm vi cung cấp đề xuất:\n${d.proposed_scope}\n\n`;
+      out += `Điều kiện thương mại đề xuất:\n${d.proposed_commercial_terms}\n\n`;
+      out += `Điều kiện nghiệm thu đề xuất:\n${d.proposed_acceptance_terms}\n\n`;
+      out += `Thời hạn bảo hành đề xuất:\n${d.proposed_warranty_terms}\n\n`;
+    }
+    out += `Ngày đàm phán dự kiến: ${d.planned_negotiation_date || '---'}\n`;
+    return out;
+  }
+
+  // init audit log with a starting entry if any
+  logAction('info', 'Form initialized. Selected bidder loaded from assessment.');
+</script>
+</body>
+</html>
